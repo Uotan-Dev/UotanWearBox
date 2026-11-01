@@ -4,14 +4,13 @@ import 'platform_support.dart';
 import 'app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_miuix/miuix.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'about/privacy.dart';
-import 'blur_menu.dart';
+import 'about/about.dart';
+import 'appearance.dart';
+import 'features_settings.dart';
 import 'about/question.dart';
-import 'about/user.dart';
-import 'donate.dart';
-import 'l10n/app_localizations.dart';
 import 'l10n/l10n.dart';
 
 class Page3 extends StatelessWidget {
@@ -38,28 +37,51 @@ class Page3 extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    final appearanceOptions = [
+      _SettingOption(
+        icon: Icons.palette_outlined,
+        svg: 'appearance',
+        title: l10n.settingsAppearanceTitle,
+        subtitle: l10n.settingsAppearanceSubtitle,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AppearancePage(
+                onLocaleChanged: onLocaleChanged,
+                currentLocale: currentLocale,
+                onThemeModeChanged: onThemeModeChanged,
+                themeMode: themeMode,
+              ),
+            ),
+          );
+        },
+      ),
+      _SettingOption(
+        svg: 'features',
+        title: l10n.settingsFeaturesTitle,
+        subtitle: l10n.settingsFeaturesSubtitle,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const FeaturesSettingsPage()),
+          );
+        },
+      ),
+    ];
+
     final faqOptions = [
       _SettingOption(
         iconPath:
             'assets/icons/help_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
+        svg: 'faq',
         title: l10n.settingsFaqTitle,
         subtitle: l10n.settingsFaqSubtitle,
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const FAQPage()),
-          );
-        },
-      ),
-      _SettingOption(
-        iconPath:
-            'assets/icons/volunteer_activism_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-        title: l10n.settingsDonateTitle,
-        subtitle: l10n.settingsDonateSubtitle,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const DonatePage()),
           );
         },
       ),
@@ -74,57 +96,18 @@ class Page3 extends StatelessWidget {
       //),
     ];
 
-    final agreementOptions = [
+    final aboutOptions = [
       _SettingOption(
         iconPath:
-            'assets/icons/verified_user_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-        title: l10n.settingsPrivacyTitle,
-        subtitle: l10n.settingsPrivacySubtitle,
+            'assets/icons/aod_watch_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
+        svg: 'about',
+        title: l10n.settingsAboutTitle,
+        subtitle: 'v$currentVersion',
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const PrivacyPage()),
+            MaterialPageRoute(builder: (context) => const AboutPage()),
           );
-        },
-      ),
-      _SettingOption(
-        iconPath:
-            'assets/icons/developer_guide_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-        title: l10n.settingsUserAgreementTitle,
-        subtitle: l10n.settingsUserAgreementSubtitle,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const UserPage()),
-          );
-        },
-      ),
-    ];
-
-    final visitOptions = [
-      _SettingOption(
-        iconPath:
-            'assets/icons/watch_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-        title: l10n.settingsWebsiteSubtitle,
-        subtitle: 'wearbox.uotan.cn',
-        onTap: () {
-          _launchURL('https://wearbox.uotan.cn/');
-        },
-      ),
-      _SettingOption(
-        iconPath: 'assets/icons/uotan.png',
-        title: l10n.settingsCommunityTitle,
-        subtitle: 'uotan.cn',
-        onTap: () {
-          _launchURL('https://www.uotan.cn');
-        },
-      ),
-      _SettingOption(
-        iconPath: 'assets/icons/github-mark.png',
-        title: l10n.viewOnGithub,
-        subtitle: l10n.githubDescription,
-        onTap: () {
-          _launchURL('https://github.com/Uotan-Dev/UOTAN-WearBox');
         },
       ),
     ];
@@ -134,32 +117,39 @@ class Page3 extends StatelessWidget {
         title: l10n.settingsPageTitle,
         body: Builder(
           builder: (context) => ListView(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            padding: EdgeInsets.fromLTRB(
+                12, 0, 12, 20 + MediaQuery.paddingOf(context).bottom),
             children: [
               _buildMiuixSectionTitle(context, l10n.setting_config),
               _buildMiuixGroup([
-                _buildLanguageCard(context, l10n),
-                _buildThemeModeCard(context, l10n),
+                for (final option in appearanceOptions)
+                  MiuixArrowPreference(
+                    title: option.title,
+                    startAction: buildSettingsIcon(option.svg),
+                    onClick: option.onTap,
+                  ),
+              ]),
+              // 常见问题、检查更新、关于
+              const SizedBox(height: 10),
+              _buildMiuixSectionTitle(context, l10n.settingsSectionAbout),
+              _buildMiuixGroup([
+                for (final option in faqOptions)
+                  MiuixArrowPreference(
+                    title: option.title,
+                    startAction: buildSettingsIcon(option.svg),
+                    onClick: option.onTap,
+                  ),
                 _CheckUpdateCard(
                   onCheckUpdate: onCheckUpdate,
                   currentVersion: currentVersion,
                 ),
+                for (final option in aboutOptions)
+                  MiuixArrowPreference(
+                    title: option.title,
+                    startAction: buildSettingsIcon(option.svg),
+                    onClick: option.onTap,
+                  ),
               ]),
-              for (final section in [
-                (l10n.settingsSectionFaq, faqOptions),
-                (l10n.settingsSectionAgreements, agreementOptions),
-                (l10n.settingsSectionVisit, visitOptions),
-              ]) ...[
-                const SizedBox(height: 10),
-                _buildMiuixSectionTitle(context, section.$1),
-                _buildMiuixGroup([
-                  for (final option in section.$2)
-                    MiuixArrowPreference(
-                      title: option.title,
-                      onClick: option.onTap,
-                    ),
-                ]),
-              ],
               const SizedBox(height: 10),
               _buildMiuixSectionTitle(context, l10n.settingsFooter),
             ],
@@ -173,30 +163,19 @@ class Page3 extends StatelessWidget {
       children: [
         _buildSectionTitle(context, l10n.setting_config),
         const SizedBox(height: 2),
-        _buildLanguageCard(context, l10n),
+        ..._buildOptions(context, appearanceOptions),
+        // 常见问题、检查更新、关于
         const SizedBox(height: 10),
-        _buildThemeModeCard(context, l10n),
+        _buildSectionTitle(context, l10n.settingsSectionAbout),
+        const SizedBox(height: 2),
+        ..._buildOptions(context, faqOptions),
         const SizedBox(height: 10),
         _CheckUpdateCard(
           onCheckUpdate: onCheckUpdate,
           currentVersion: currentVersion,
         ),
         const SizedBox(height: 10),
-        _buildSectionTitle(context, l10n.settingsSectionFaq),
-        const SizedBox(height: 2),
-
-        // 问题反馈
-        ..._buildOptions(context, faqOptions),
-        // 问题反馈
-
-        const SizedBox(height: 10),
-        _buildSectionTitle(context, l10n.settingsSectionAgreements),
-        const SizedBox(height: 2),
-        ..._buildOptions(context, agreementOptions),
-        const SizedBox(height: 10),
-        _buildSectionTitle(context, l10n.settingsSectionVisit),
-        const SizedBox(height: 2),
-        ..._buildOptions(context, visitOptions),
+        ..._buildOptions(context, aboutOptions),
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -263,98 +242,6 @@ class Page3 extends StatelessWidget {
             child: list,
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildLanguageCard(BuildContext context, AppLocalizations l10n) {
-    final currentSelection = currentLocale?.languageCode ?? 'system';
-    if (isNarrowLayout(context)) {
-      const values = ['system', 'zh', 'en', 'ja'];
-      final selectedIndex = values.indexOf(currentSelection);
-      return MiuixOverlayDropdownPreference(
-        title: l10n.settingsLanguageTitle,
-        items: [l10n.languageSystem, '简体中文', 'English', '日本語'],
-        selectedIndex: selectedIndex < 0 ? 0 : selectedIndex,
-        onSelectedIndexChange: (index) =>
-            onLocaleChanged(index == 0 ? null : Locale(values[index])),
-      );
-    }
-    return Material(
-      color: context.palette.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: ListTile(
-          leading: Image.asset(
-            'assets/icons/globe_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-            width: 20,
-            height: 20,
-            color: context.palette.text,
-          ),
-          title: Text(l10n.settingsLanguageTitle),
-          subtitle: Text(l10n.settingsLanguageSubtitle),
-          trailing: BlurDropdown<String>(
-            value: currentSelection,
-            onChanged: (value) {
-              if (value == 'system') {
-                onLocaleChanged(null);
-              } else {
-                onLocaleChanged(Locale(value));
-              }
-            },
-            items: [
-              BlurMenuItem(value: 'system', label: l10n.languageSystem),
-              const BlurMenuItem(value: 'zh', label: '简体中文'),
-              const BlurMenuItem(value: 'en', label: 'English'),
-              const BlurMenuItem(value: 'ja', label: '日本語'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThemeModeCard(BuildContext context, AppLocalizations l10n) {
-    if (isNarrowLayout(context)) {
-      const values = [ThemeMode.system, ThemeMode.dark, ThemeMode.light];
-      return MiuixOverlayDropdownPreference(
-        title: l10n.settingsDarkModeTitle,
-        items: [
-          l10n.themeModeSystem,
-          l10n.themeModeAlwaysOn,
-          l10n.themeModeAlwaysOff,
-        ],
-        selectedIndex: values.indexOf(themeMode),
-        onSelectedIndexChange: (index) => onThemeModeChanged(values[index]),
-      );
-    }
-    return Material(
-      color: context.palette.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: ListTile(
-          leading: const Icon(Icons.dark_mode_outlined, size: 20),
-          title: Text(l10n.settingsDarkModeTitle),
-          subtitle: Text(l10n.settingsDarkModeSubtitle),
-          trailing: BlurDropdown<ThemeMode>(
-            value: themeMode,
-            onChanged: onThemeModeChanged,
-            items: [
-              BlurMenuItem(
-                  value: ThemeMode.system, label: l10n.themeModeSystem),
-              BlurMenuItem(
-                  value: ThemeMode.dark, label: l10n.themeModeAlwaysOn),
-              BlurMenuItem(
-                  value: ThemeMode.light, label: l10n.themeModeAlwaysOff),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -433,12 +320,16 @@ class Page3 extends StatelessWidget {
           child: ListTile(
             title: Text(option.title),
             subtitle: Text(option.subtitle),
-            leading: Image.asset(
-              option.iconPath,
-              width: 20,
-              height: 20,
-              color: context.palette.text,
-            ),
+            leading: option.svg != null
+                ? buildWideSettingsIcon(context, option.svg!)
+                : option.iconPath != null
+                ? Image.asset(
+                    option.iconPath!,
+                    width: 20,
+                    height: 20,
+                    color: context.palette.text,
+                  )
+                : Icon(option.icon, size: 20),
             trailing: const Icon(
               Icons.arrow_forward_ios,
               size: 14,
@@ -447,15 +338,6 @@ class Page3 extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  static Future<void> _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      debugPrint('无法打开URL: $url');
-    }
   }
 
   static Future<void> _launchEmail(String subject, String body) async {
@@ -474,6 +356,37 @@ class Page3 extends StatelessWidget {
       debugPrint('无法发送邮件至: ${emailUri.toString()}');
     }
   }
+}
+
+/// 窄屏设置项行首的 svg 图标
+Widget? buildSettingsIcon(String? name) {
+  if (name == null) {
+    return null;
+  }
+  return Builder(
+    builder: (context) => Padding(
+      padding: const EdgeInsetsDirectional.only(end: 8),
+      child: SvgPicture.asset(
+        'assets/settings/$name.svg',
+        width: 22,
+        height: 22,
+        colorFilter: ColorFilter.mode(
+          MiuixTheme.of(context).colors.onBackground,
+          BlendMode.srcIn,
+        ),
+      ),
+    ),
+  );
+}
+
+/// 宽屏设置项卡片的 svg 图标，与窄屏共用 assets/settings/ 下的图标
+Widget buildWideSettingsIcon(BuildContext context, String name) {
+  return SvgPicture.asset(
+    'assets/settings/$name.svg',
+    width: 22,
+    height: 22,
+    colorFilter: ColorFilter.mode(context.palette.text, BlendMode.srcIn),
+  );
 }
 
 /// 检查更新的结果
@@ -517,22 +430,28 @@ class _CheckUpdateCardState extends State<_CheckUpdateCard> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     if (isNarrowLayout(context)) {
+      final MiuixThemeData theme = MiuixTheme.of(context);
       return MiuixArrowPreference(
         title: l10n.settingsCheckUpdateTitle,
-        summary: l10n.settingsCurrentVersion(widget.currentVersion),
+        startAction: buildSettingsIcon('update'),
         enabled: !_checking,
         onClick: _checking ? null : _check,
-        endActions: _checking
-            ? const [
-                SizedBox(
+        endActions: [
+          _checking
+              ? const SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
                   ),
+                )
+              : Text(
+                  l10n.settingsCurrentVersion(widget.currentVersion),
+                  style: theme.textStyles.body2.copyWith(
+                    color: theme.colors.onSurfaceVariantActions,
+                  ),
                 ),
-              ]
-            : null,
+        ],
       );
     }
     return Material(
@@ -546,7 +465,7 @@ class _CheckUpdateCardState extends State<_CheckUpdateCard> {
         child: Padding(
           padding: const EdgeInsets.all(5.0),
           child: ListTile(
-            leading: const Icon(Icons.update, size: 20),
+            leading: buildWideSettingsIcon(context, 'update'),
             title: Text(l10n.settingsCheckUpdateTitle),
             subtitle: Text(l10n.settingsCheckUpdateSubtitle),
             trailing: _checking
@@ -568,13 +487,19 @@ class _CheckUpdateCardState extends State<_CheckUpdateCard> {
 
 class _SettingOption {
   const _SettingOption({
-    required this.iconPath,
+    this.iconPath,
+    this.icon,
+    this.svg,
     required this.title,
     required this.subtitle,
     this.onTap,
   });
 
-  final String iconPath;
+  final String? iconPath;
+  final IconData? icon;
+
+  /// 行首图标，assets/settings/ 下的 svg 文件名；为空时使用 [iconPath] 或 [icon]
+  final String? svg;
   final String title;
   final String subtitle;
   final VoidCallback? onTap;

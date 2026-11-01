@@ -9,13 +9,11 @@ class PrivacyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 窄屏：左右与 miuix 标题对齐（26），顶部间距统一由 MiuixTitledPage 提供
     final body = SingleChildScrollView(
-      padding: EdgeInsets.fromLTRB(
-        isNarrowLayout(context) ? 20 : 30,
-        20,
-        isNarrowLayout(context) ? 20 : 30,
-        30,
-      ),
+      padding: isNarrowLayout(context)
+          ? const EdgeInsets.fromLTRB(26, 0, 26, 30)
+          : const EdgeInsets.fromLTRB(30, 20, 30, 30),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

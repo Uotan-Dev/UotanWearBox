@@ -34,8 +34,9 @@ class _WirelessPageState extends State<WirelessPage> {
         builder: (context) => ListView(
           padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
           children: [
+            // 顶部间距统一由 MiuixTitledPage 提供，说明文字只保留下方间距
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: MiuixText(
                 l10n.wirelessHeaderIntro,
                 style: MiuixTheme.of(context).textStyles.footnote1,

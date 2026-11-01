@@ -17,6 +17,24 @@
   "settingsSectionFaq": "FAQ",
   "settingsSectionAgreements": "Agreements",
   "settingsSectionVisit": "Visit Website",
+  "settingsSectionAbout": "About",
+  "settingsAboutTitle": "About Uotan WearBox",
+  "settingsAppearanceTitle": "Display",
+  "settingsAppearanceSubtitle": "Language and dark mode",
+  "settingsFeaturesTitle": "Features",
+  "settingsFeaturesSubtitle": "Turn optional features on or off",
+  "featuresAppCenterTitle": "Enable App Center",
+  "featuresAppCenterSubtitle": "Show the Apps page in the navigation bar to browse and install watch apps",
+  "aboutLicensesTitle": "Open source licenses",
+  "aboutWithdrawConsentTitle": "Withdraw privacy policy consent",
+  "withdrawConsentMessage": "After withdrawing, the app will exit. You will need to read and accept the User Agreement and Privacy Policy again the next time you open it.",
+  "withdrawConsentConfirm": "Withdraw and exit",
+  "consentDialogTitle": "User Agreement and Privacy Policy",
+  "consentDialogMessage": "Welcome to Uotan WearBox. Before you start, please read and agree to the following:",
+  "consentDisagree": "Disagree and exit",
+  "consentAgree": "Agree",
+  "aboutIcpLabel": "ICP filing number",
+  "aboutSectionFiling": "Filing information",
   "settingsFaqTitle": "Frequently Asked Questions",
   "settingsFaqSubtitle": "Having trouble using or connecting? Start by reading the FAQ.",
   "settingsDonateTitle": "Donate",
@@ -299,8 +317,6 @@
   "installApptoWatch": "Install app(apk) on watch",
   "selectApptoInstall": "Select an APK file to install",
   "installingWaiting": "Installation in progress, please wait...",
-  "installNoDeviceTitle": "No device connected",
-  "installNoDeviceMessage": "No device was detected. Please make sure the device is connected.",
   "installSuccessTitle": "Install successful",
   "installSuccessMessage": "The app has been installed successfully!",
   "installFailureTitle": "Install failed",
@@ -321,10 +337,9 @@
   "installNoFileSelected": "No file selected.",
   "commonErrorTitle": "Error",
   "commonNoticeTitle": "Notice",
+  "deviceNotConnectedTitle": "Device not connected",
+  "deviceNotConnectedMessage": "No device detected. Make sure your watch is connected and USB debugging is enabled.",
   "buttonPageTitle": "Button simulation",
-  "buttonDeviceNotConnectedTitle": "Device not connected",
-  "buttonDeviceNotConnectedMessage": "Please check that the device is connected to the computer and USB debugging is enabled.",
-  "buttonConnectFirstMessage": "Please connect the device first.",
   "buttonSendKeySuccess": "Key event {keycode} sent successfully.",
   "@buttonSendKeySuccess": {
     "placeholders": {
@@ -354,7 +369,6 @@
   "displayPageTitle": "Display settings",
   "displayValueUnknown": "Not fetched",
   "displayValueUnavailable": "Unavailable",
-  "displayDeviceNotConnectedMessage": "No device detected. Please check the connection.",
   "displayErrorCheckingConnection": "Unable to check device connection status: {error}",
   "@displayErrorCheckingConnection": {
     "placeholders": {
@@ -441,7 +455,6 @@
       "error": {}
     }
   },
-  "appManageDeviceDisconnected": "The device appears to be disconnected.",
   "appManageTooltipUnfreeze": "Unfreeze",
   "appManageTooltipFreeze": "Freeze",
   "appManageTooltipExportApk": "Export APK",
@@ -635,7 +648,6 @@
       "error": {}
     }
   },
-  "typeNoDeviceMessage": "No device detected. Please check the connection.",
   "typeEmptyTextMessage": "Please enter some text.",
   "typeSendingProgress": "Sending text...",
   "typePermissionDenied": "Permission denied. Enable \"USB debugging (Security settings)\" in Developer Options and try again.",

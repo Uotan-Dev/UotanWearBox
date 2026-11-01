@@ -172,7 +172,8 @@ class _SidebarButtonState extends State<_SidebarButton> {
   }
 }
 
-/// 窄屏底部导航栏：使用 flutter_miuix 的 HyperOS 风格导航栏（MiuixNavigationBar），停靠在页面底部。
+/// 窄屏底部导航栏：flutter_miuix 的 HyperOS 风格导航栏（MiuixNavigationBar），停靠在页面底部。
+/// 底色延伸到手势导航条下方（沉浸），导航项位于手势导航条上方。
 class AppBottomBar extends StatelessWidget {
   const AppBottomBar({
     super.key,
@@ -185,37 +186,56 @@ class AppBottomBar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
+  /// 导航栏高度（不含手势导航条），用于 Snackbar 等避开导航栏
+  static const double totalHeight = 64;
+
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.palette;
     return MiuixTheme(
       data: palette.isDark ? MiuixThemeData.dark() : MiuixThemeData.light(),
-      child: MiuixNavigationBar(
-        // 底色与页面背景一致，顶部保留 miuix 分隔线
-        color: palette.background,
-        // 手势导航条区域已由 SafeArea 留出，并由外框铺同色背景，避免重复留白
-        defaultWindowInsetsPadding: false,
-        children: [
-          for (int i = 0; i < items.length; i++)
-            MiuixNavigationBarItem(
-              selected: i == selectedIndex,
-              onPressed: () => onSelected(i),
-              label: items[i].label,
-              // 图标沿用侧边栏 SVG，颜色取导航栏下发的 IconTheme（选中 / 未选中）
-              icon: Builder(
-                builder: (context) => SvgPicture.asset(
-                  'assets/sidebar/${i == selectedIndex ? items[i].selectedIcon : items[i].icon}.svg',
-                  width: 24,
-                  height: 24,
-                  colorFilter: ColorFilter.mode(
-                    IconTheme.of(context).color ?? palette.text,
-                    BlendMode.srcIn,
+      child: Builder(builder: (context) {
+        final MiuixNavigationBarColors defaults =
+            MiuixNavigationBarDefaults.defaultColors(context);
+        return MiuixNavigationBar(
+          // 文字：选中项为深灰（未选中项为其 40% 透明度），而不是默认的近黑色
+          colors: MiuixNavigationBarColors(
+            background: defaults.background,
+            floatingBackground: defaults.floatingBackground,
+            content: palette.isDark
+                ? const Color(0xFFD0D0D0)
+                : const Color(0xFF444444),
+            divider: defaults.divider,
+          ),
+          // 底色与页面背景一致，顶部保留 miuix 分隔线
+          color: palette.background,
+          // 由导航栏自身让出手势导航条高度，底色铺到屏幕底部
+          defaultWindowInsetsPadding: true,
+          children: [
+            for (int i = 0; i < items.length; i++)
+              MiuixNavigationBarItem(
+                selected: i == selectedIndex,
+                onPressed: () => onSelected(i),
+                label: items[i].label,
+                // 图标沿用侧边栏 SVG，颜色取导航栏下发的 IconTheme（选中 / 未选中）
+                icon: Builder(
+                  builder: (context) => SvgPicture.asset(
+                    'assets/sidebar/${i == selectedIndex ? items[i].selectedIcon : items[i].icon}.svg',
+                    width: 24,
+                    height: 24,
+                    // 图标保持 miuix 默认颜色，只沿用导航栏下发的透明度（选中 / 未选中 / 按下）
+                    colorFilter: ColorFilter.mode(
+                      defaults.content.withValues(
+                        alpha: IconTheme.of(context).color?.a ?? 1,
+                      ),
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
-            ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 }

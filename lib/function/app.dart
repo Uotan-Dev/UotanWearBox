@@ -50,7 +50,7 @@ class _AppManagementPageState extends State<AppManagementPage> {
   void _fetchInstalledApps() async {
     final l10n = context.l10n;
     if (!await _isDeviceConnected()) {
-      _shownoconnectDialog(l10n.appManageNoAppsOrDevice);
+      _shownoconnectDialog(l10n.deviceNotConnectedMessage);
       if (!mounted) return;
       setState(() {
         isLoading = false;
@@ -123,14 +123,14 @@ class _AppManagementPageState extends State<AppManagementPage> {
   
 
   // 显示错误弹窗
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, {String? title}) {
     showMiuixDialog(
       context: context,
       builder: (BuildContext context) {
         final l10n = context.l10n;
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface, // 弹窗背景颜色
-          title: Text(l10n.commonErrorTitle),
+          title: Text(title ?? l10n.commonErrorTitle),
           content: Text(message, style: TextStyle(color: context.palette.text)),
           actions: [
             MiuixDialogButton(
@@ -164,7 +164,7 @@ class _AppManagementPageState extends State<AppManagementPage> {
         final l10n = context.l10n;
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface, // 弹窗背景颜色
-          title: Text(l10n.installNoDeviceTitle),
+          title: Text(l10n.deviceNotConnectedTitle),
           content: Text(message, style: TextStyle(color: context.palette.text)),
           actions: [
             MiuixDialogButton(
@@ -308,7 +308,7 @@ class _AppManagementPageState extends State<AppManagementPage> {
                               ),
                               onPressed: () async {
                                 if (!await _isDeviceConnected()) {
-                                  _shownoconnectDialog(l10n.appManageDeviceDisconnected);
+                                  _shownoconnectDialog(l10n.deviceNotConnectedMessage);
                                   return;
                                 }
                                 if (installedApps[index]['isFrozen']) {
@@ -330,7 +330,7 @@ class _AppManagementPageState extends State<AppManagementPage> {
                               ),
                               onPressed: () async {
                                 if (!await _isDeviceConnected()) {
-                                  _shownoconnectDialog(l10n.appManageDeviceDisconnected);
+                                  _shownoconnectDialog(l10n.deviceNotConnectedMessage);
                                   return;
                                 }
                                 _extractApk(installedApps[index]['name']);
@@ -349,7 +349,7 @@ class _AppManagementPageState extends State<AppManagementPage> {
                                 ),
                                 onPressed: () async {
                                   if (!await _isDeviceConnected()) {
-                                    _shownoconnectDialog(l10n.appManageDeviceDisconnected);
+                                    _shownoconnectDialog(l10n.deviceNotConnectedMessage);
                                     return;
                                   }
                                   _showConfirmUninstallDialog(installedApps[index]['name']);
@@ -411,7 +411,8 @@ class _AppManagementPageState extends State<AppManagementPage> {
                 if (await _isDeviceConnected()) {
                   _uninstallApp(packageName); // 执行卸载操作
                 } else {
-                  _showErrorDialog(l10n.installNoDeviceMessage);
+                  _showErrorDialog(l10n.deviceNotConnectedMessage,
+                      title: l10n.deviceNotConnectedTitle);
                 }
               },
               child: Text(l10n.dialogConfirm),

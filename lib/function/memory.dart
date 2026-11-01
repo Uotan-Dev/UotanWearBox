@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -49,7 +51,9 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
     final l10n = context.l10n;
     return PopScope(
       canPop: !_isBusy,
-      child: Scaffold(
+      child: isNarrowLayout(context)
+          ? _buildNarrow(context)
+          : Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(90.0),
           child: Padding(
@@ -107,6 +111,128 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
       ),
     );
   }
+
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    final int total = _memInfo['MemTotal'] ?? 0;
+    final int free = _memInfo['MemFree'] ?? 0;
+    final int available = _memInfo['MemAvailable'] ?? 0;
+    final int cached = _memInfo['Cached'] ?? 0;
+    final int used = total > 0 ? (total - available) : 0;
+    final double memoryPercent =
+        total > 0 ? (used / total).clamp(0.0, 1.0).toDouble() : 0.0;
+    final double storagePercent = _storageTotalKb > 0
+        ? (_storageUsedKb / _storageTotalKb).clamp(0.0, 1.0).toDouble()
+        : 0.0;
+    // "储存: {storage}" / "内存: {memory}" 取冒号前的名称
+    String label(String text) => text.split(RegExp('[:：]')).first.trim();
+
+    Widget usageRow(String title, double percent, int usedKb, int totalKb) {
+      return MiuixValueRow(
+        title: title,
+        summary: _formatRatioGb(usedKb, totalKb),
+        value: '${(percent * 100).round()}%',
+        bottom: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: MiuixLinearProgressIndicator(progress: percent),
+        ),
+      );
+    }
+
+    return MiuixTitledPage(
+      title: l10n.featureMemoryClean,
+      showBackButton: true,
+      // 清理进行中禁止返回（与宽屏一致）
+      onBackPressed: _isBusy ? () {} : null,
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+        children: <Widget>[
+          MiuixGroupCard(
+            children: <Widget>[
+              usageRow(label(l10n.deviceStorage('')), storagePercent,
+                  _storageUsedKb, _storageTotalKb),
+              usageRow(label(l10n.deviceMemory('')), memoryPercent, used, total),
+            ],
+          ),
+          MiuixSectionTitle(l10n.memoryStatusTitle),
+          MiuixGroupCard(
+            children: <Widget>[
+              MiuixValueRow(title: l10n.memoryTotal, value: _formatKb(total)),
+              MiuixValueRow(title: l10n.memoryUsed, value: _formatKb(used)),
+              MiuixValueRow(
+                  title: l10n.memoryAvailable, value: _formatKb(available)),
+              MiuixValueRow(title: l10n.memoryFree, value: _formatKb(free)),
+              MiuixValueRow(title: l10n.memoryCached, value: _formatKb(cached)),
+            ],
+          ),
+          MiuixSectionTitle(l10n.memoryCleanupTitle),
+          MiuixGroupCard(
+            children: <Widget>[
+              MiuixArrowPreference(
+                title: l10n.memoryClearBackground,
+                enabled: !_isBusy,
+                onClick: _killBackgroundProcesses,
+              ),
+              MiuixArrowPreference(
+                title: l10n.memoryClearCache,
+                enabled: !_isBusy,
+                onClick: _trimCaches,
+              ),
+              MiuixArrowPreference(
+                title: l10n.memoryForceStop,
+                summary: _packageController.text.trim().isEmpty
+                    ? null
+                    : _packageController.text.trim(),
+                enabled: !_isBusy,
+                onClick: _askPackageAndForceStop,
+              ),
+            ],
+          ),
+          if (_isBusy)
+            const Padding(
+              padding: EdgeInsets.only(top: 24),
+              child: Center(child: MiuixInfiniteProgressIndicator()),
+            ),
+        ],
+      ),
+    );
+  }
+
+  // 窄屏：miuix 弹窗输入包名后强制停止
+  Future<void> _askPackageAndForceStop() async {
+    final l10n = context.l10n;
+    final bool? confirmed = await showMiuixDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => MiuixAlertDialog(
+        title: Text(l10n.memoryCustomPackage),
+        content: MiuixTextField(
+          controller: _packageController,
+          label: l10n.memoryPackageHint,
+          useLabelAsPlaceholder: true,
+          singleLine: true,
+          onSubmitted: (_) => Navigator.of(dialogContext).pop(true),
+        ),
+        actions: <Widget>[
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.dialogCancel),
+          ),
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.memoryForceStop),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      setState(() {});
+      await _forceStopPackage();
+    }
+  }
+
+  // ---------- 宽屏 ----------
 
   Widget _buildUsageCard() {
     final int total = _memInfo['MemTotal'] ?? 0;
@@ -535,7 +661,10 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
         return false;
       }
       if (!connected && showDialog) {
-        _showErrorDialog(context.l10n.buttonDeviceNotConnectedMessage);
+        _showErrorDialog(
+          context.l10n.deviceNotConnectedMessage,
+          title: context.l10n.deviceNotConnectedTitle,
+        );
       }
       return connected;
     } catch (e) {
@@ -568,14 +697,14 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
     return '${usedGb.toStringAsFixed(2)}GB/${totalGb.toStringAsFixed(2)}GB';
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, {String? title}) {
     showMiuixDialog<void>(
       context: context,
       builder: (BuildContext context) {
         final l10n = context.l10n;
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface,
-          title: Text(l10n.commonErrorTitle),
+          title: Text(title ?? l10n.commonErrorTitle),
           content: Text(message),
           actions: <Widget>[
             MiuixDialogButton(

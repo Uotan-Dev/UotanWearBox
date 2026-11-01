@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'package:flutter/material.dart';
@@ -34,9 +36,9 @@ class _FAQPageState extends State<FAQPage> {
   }
 
   // 将包含 <b>...</b> 标记的本地化字符串渲染为富文本
-  Widget _buildRichText(String text, {double fontSize = 16}) {
-    final normalStyle = TextStyle(fontSize: fontSize);
-    final boldStyle = TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold);
+  Widget _buildRichText(String text, {double fontSize = 16, TextStyle? style}) {
+    final normalStyle = style ?? TextStyle(fontSize: fontSize);
+    final boldStyle = normalStyle.copyWith(fontWeight: FontWeight.bold);
 
     final spans = <TextSpan>[];
     int start = 0;
@@ -67,6 +69,9 @@ class _FAQPageState extends State<FAQPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isNarrowLayout(context)) {
+      return _buildNarrow(context);
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0), // 设置 AppBar 的高度
@@ -373,6 +378,126 @@ class _FAQPageState extends State<FAQPage> {
               ),
             ),
             const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    final List<(String, GlobalKey)> sections = <(String, GlobalKey)>[
+      (l10n.faqMenuDeviceCannotConnect, _keyQuestion1),
+      (l10n.faqMenuHowEnableUsbDebug, _keyQuestion2),
+      (l10n.faqMenuWhyAdbDebug, _keyQuestion3),
+      (l10n.faqMenuHowWirelessConnect, _keyQuestion4),
+      (l10n.faqMenuHowGetWirelessIpPort, _keyQuestion5),
+      (l10n.faqMenuFeatureNoResponse, _keyQuestion6),
+    ];
+    return MiuixTitledPage(
+      title: l10n.faqPageTitle,
+      showBackButton: true,
+      // 右上角菜单：跳转到对应问题（替代宽屏的侧边抽屉）
+      actions: <Widget>[
+        MiuixOverlayIconDropdownMenu(
+          entry: MiuixDropdownEntry(
+            items: <MiuixDropdownItem>[
+              for (final (String title, GlobalKey key) in sections)
+                MiuixDropdownItem(
+                  text: title,
+                  onClick: () => _scrollToSection(key),
+                ),
+            ],
+          ),
+          child: Builder(
+            builder: (context) => MiuixIcon(
+              vector: MiuixIcons.extended.byName('more')!,
+              size: 24,
+              tint: MiuixTheme.of(context).colors.onBackground,
+            ),
+          ),
+        ),
+      ],
+      body: Builder(
+        builder: (context) {
+          final MiuixThemeData theme = MiuixTheme.of(context);
+          final TextStyle bodyStyle = theme.textStyles.body2.copyWith(
+            color: theme.colors.onSurfaceSecondary,
+            height: 1.5,
+          );
+          Widget paragraph(String text) => Text(text, style: bodyStyle);
+          Widget rich(String text) => _buildRichText(text, style: bodyStyle);
+          return SingleChildScrollView(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                _narrowCard(context, _keyQuestion1, l10n.faqQ1Title, <Widget>[
+                  paragraph(l10n.faqQ1Body),
+                ]),
+                _narrowCard(context, _keyQuestion2, l10n.faqQ2Title, <Widget>[
+                  paragraph(l10n.faqQ2Intro),
+                  rich(l10n.faqQ2Step1),
+                  rich(l10n.faqQ2Step2),
+                  rich(l10n.faqQ2Step3),
+                  rich(l10n.faqQ2Step4),
+                ]),
+                _narrowCard(context, _keyQuestion3, l10n.faqQ3Title, <Widget>[
+                  paragraph(l10n.faqQ3Body),
+                ]),
+                _narrowCard(context, _keyQuestion4, l10n.faqQ4Title, <Widget>[
+                  paragraph(l10n.faqQ4Intro),
+                  paragraph(l10n.faqQ4Bullet1),
+                  rich(l10n.faqQ4Bullet2),
+                  paragraph(l10n.faqQ4Conclusion),
+                ]),
+                _narrowCard(context, _keyQuestion5, l10n.faqQ5Title, <Widget>[
+                  paragraph(l10n.faqQ5Intro),
+                  paragraph(l10n.faqQ5Body),
+                ]),
+                _narrowCard(context, _keyQuestion6, l10n.faqQ6Title, <Widget>[
+                  paragraph(l10n.faqQ6Body1),
+                  paragraph(l10n.faqQ6Body2),
+                  paragraph(l10n.faqQ6Body3),
+                ]),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // 一个问题一张 miuix 卡片：问题为标题，回答为正文段落
+  Widget _narrowCard(
+    BuildContext context,
+    GlobalKey key,
+    String title,
+    List<Widget> paragraphs,
+  ) {
+    final MiuixThemeData theme = MiuixTheme.of(context);
+    return Padding(
+      key: key,
+      padding: const EdgeInsets.only(bottom: 12),
+      child: MiuixCard(
+        insideMargin: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text(
+              title,
+              style: theme.textStyles.body1.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colors.onBackground,
+              ),
+            ),
+            for (final Widget p in paragraphs) ...<Widget>[
+              const SizedBox(height: 8),
+              p,
+            ],
           ],
         ),
       ),

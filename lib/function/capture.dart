@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -42,7 +44,9 @@ class _CapturePageState extends State<CapturePage> {
     final l10n = context.l10n;
     return PopScope(
       canPop: !_isBusy && !_isRecording,
-      child: Scaffold(
+      child: isNarrowLayout(context)
+          ? _buildNarrow(context)
+          : Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(90.0),
           child: Padding(
@@ -200,6 +204,101 @@ class _CapturePageState extends State<CapturePage> {
     );
   }
 
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    final bool locked = _isBusy || _isRecording;
+    final bool toComputer = _saveTarget == _SaveTarget.computer;
+    return MiuixTitledPage(
+      title: l10n.featureCapture,
+      showBackButton: true,
+      // 截屏 / 录屏进行中禁止返回（与宽屏一致）
+      onBackPressed: locked ? () {} : null,
+      body: Builder(
+        builder: (context) {
+          final MiuixThemeData theme = MiuixTheme.of(context);
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            children: <Widget>[
+              MiuixSectionTitle(l10n.captureSaveLocation, top: 0),
+              MiuixGroupCard(
+                children: <Widget>[
+                  MiuixOverlayDropdownPreference(
+                    title: l10n.captureSaveLocation,
+                    items: <String>[
+                      l10n.captureComputerFolder,
+                      l10n.captureDeviceFolder,
+                    ],
+                    selectedIndex: toComputer ? 0 : 1,
+                    enabled: !locked,
+                    onSelectedIndexChange: (int index) => setState(() {
+                      _saveTarget = index == 0
+                          ? _SaveTarget.computer
+                          : _SaveTarget.device;
+                    }),
+                  ),
+                  MiuixArrowPreference(
+                    title: toComputer
+                        ? l10n.captureChooseFolder
+                        : l10n.captureSetDevicePath,
+                    summary: toComputer
+                        ? (_localDirectory ?? _defaultLocalDirectory())
+                        : _normalizedDeviceDirectory(),
+                    enabled: !locked,
+                    onClick: toComputer
+                        ? _selectLocalDirectory
+                        : _editDeviceDirectory,
+                  ),
+                ],
+              ),
+              MiuixSectionTitle(l10n.captureSectionTitle),
+              MiuixGroupCard(
+                children: <Widget>[
+                  MiuixArrowPreference(
+                    title: l10n.captureTakeScreenshot,
+                    enabled: !_isBusy,
+                    onClick: _captureScreenshot,
+                  ),
+                  MiuixArrowPreference(
+                    title: l10n.captureStartRecording,
+                    enabled: !locked,
+                    onClick: _startScreenRecord,
+                  ),
+                  MiuixArrowPreference(
+                    title: l10n.captureStopRecording,
+                    enabled: !_isBusy && _isRecording,
+                    onClick: _stopScreenRecord,
+                  ),
+                ],
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  MiuixBasicComponentDefaults.insideMargin.left,
+                  8,
+                  MiuixBasicComponentDefaults.insideMargin.right,
+                  0,
+                ),
+                child: MiuixText(
+                  l10n.captureLocationLockedHint,
+                  style: theme.textStyles.footnote1,
+                  color: theme.colors.onBackgroundVariant,
+                ),
+              ),
+              if (_isBusy)
+                const Padding(
+                  padding: EdgeInsets.only(top: 24),
+                  child: Center(child: MiuixInfiniteProgressIndicator()),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // ---------- 宽屏 ----------
+
   Widget _buildModeButton({
     required String text,
     required bool isActive,
@@ -277,12 +376,11 @@ class _CapturePageState extends State<CapturePage> {
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface,
           title: Text(context.l10n.captureDeviceSavePath),
-          content: TextField(
+          content: MiuixTextField(
             controller: controller,
-            decoration: const InputDecoration(
-              hintText: '/sdcard/DCIM',
-              border: OutlineInputBorder(),
-            ),
+            label: '/sdcard/DCIM',
+            useLabelAsPlaceholder: true,
+            singleLine: true,
           ),
           actions: <Widget>[
             MiuixDialogButton(
@@ -499,7 +597,10 @@ class _CapturePageState extends State<CapturePage> {
         return false;
       }
       if (!connected && showDialog) {
-        _showErrorDialog(context.l10n.buttonDeviceNotConnectedMessage);
+        _showErrorDialog(
+          context.l10n.deviceNotConnectedMessage,
+          title: context.l10n.deviceNotConnectedTitle,
+        );
       }
       return connected;
     } catch (e) {
@@ -557,13 +658,13 @@ class _CapturePageState extends State<CapturePage> {
     return stderr.isEmpty ? fallback : stderr;
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, {String? title}) {
     showMiuixDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface,
-          title: Text(context.l10n.commonErrorTitle),
+          title: Text(title ?? context.l10n.commonErrorTitle),
           content: Text(message),
           actions: <Widget>[
             MiuixDialogButton(

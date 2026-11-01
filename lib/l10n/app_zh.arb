@@ -17,6 +17,24 @@
   "settingsSectionFaq": "常见问题",
   "settingsSectionAgreements": "用户协议",
   "settingsSectionVisit": "访问官网",
+  "settingsSectionAbout": "关于",
+  "settingsAboutTitle": "关于柚坛手表助手",
+  "settingsAppearanceTitle": "界面显示",
+  "settingsAppearanceSubtitle": "语言设置与深色模式",
+  "settingsFeaturesTitle": "功能",
+  "settingsFeaturesSubtitle": "开启或关闭可选功能",
+  "featuresAppCenterTitle": "启用应用中心",
+  "featuresAppCenterSubtitle": "在导航栏中显示“应用”页面，可浏览并安装手表应用",
+  "aboutLicensesTitle": "开源许可声明",
+  "aboutWithdrawConsentTitle": "撤回隐私政策同意",
+  "withdrawConsentMessage": "撤回同意后应用将退出，下次打开时需要重新阅读并同意用户协议和隐私政策才能继续使用。",
+  "withdrawConsentConfirm": "撤回并退出",
+  "consentDialogTitle": "用户协议与隐私政策",
+  "consentDialogMessage": "欢迎使用柚坛手表助手！开始使用前，请仔细阅读并同意以下协议：",
+  "consentDisagree": "不同意并退出",
+  "consentAgree": "同意",
+  "aboutIcpLabel": "ICP备案号",
+  "aboutSectionFiling": "备案信息",
   "settingsFaqTitle": "常见问题",
   "settingsFaqSubtitle": "不会使用、无法连接或无法操作，请先阅读常见问题说明",
   "settingsDonateTitle": "捐赠",
@@ -299,8 +317,6 @@
   "installApptoWatch": "安装应用到手表",
   "selectApptoInstall": "选择APK文件并安装",
   "installingWaiting": "安装进行中，请稍候...",
-  "installNoDeviceTitle": "没有连接设备",
-  "installNoDeviceMessage": "没有检测到设备，请确保设备已连接。",
   "installSuccessTitle": "安装成功",
   "installSuccessMessage": "应用已成功安装！",
   "installFailureTitle": "安装失败",
@@ -321,10 +337,9 @@
   "installNoFileSelected": "未选择任何文件",
   "commonErrorTitle": "错误",
   "commonNoticeTitle": "提示",
+  "deviceNotConnectedTitle": "设备未连接",
+  "deviceNotConnectedMessage": "未检测到设备，请确认手表已连接并开启 USB 调试。",
   "buttonPageTitle": "按键模拟",
-  "buttonDeviceNotConnectedTitle": "设备未连接",
-  "buttonDeviceNotConnectedMessage": "请检查设备是否连接到电脑，并开启USB调试模式",
-  "buttonConnectFirstMessage": "请先连接设备",
   "buttonSendKeySuccess": "成功发送按键事件：{keycode}",
   "@buttonSendKeySuccess": {
     "placeholders": {
@@ -354,7 +369,6 @@
   "displayPageTitle": "显示设置",
   "displayValueUnknown": "未获取",
   "displayValueUnavailable": "无法获取",
-  "displayDeviceNotConnectedMessage": "未检测到设备，请检查设备连接",
   "displayErrorCheckingConnection": "无法检测设备连接状态: {error}",
   "@displayErrorCheckingConnection": {
     "placeholders": {
@@ -441,7 +455,6 @@
       "error": {}
     }
   },
-  "appManageDeviceDisconnected": "检测到设备已断开连接。",
   "appManageTooltipUnfreeze": "解冻",
   "appManageTooltipFreeze": "冻结",
   "appManageTooltipExportApk": "导出APK",
@@ -635,7 +648,6 @@
       "error": {}
     }
   },
-  "typeNoDeviceMessage": "未检测到设备，请检查设备连接",
   "typeEmptyTextMessage": "请输入文本",
   "typeSendingProgress": "正在发送文本...",
   "typePermissionDenied": "权限不足。请前往“开发者选项”开启“USB调试（安装设置）”后重试。",

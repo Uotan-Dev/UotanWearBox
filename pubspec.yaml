@@ -135,6 +135,7 @@ flutter:
       - assets/adb.png
       - assets/sidebar/
       - assets/file_manager/
+      - assets/settings/
       - assets/driver/0.png
       - assets/driver/1.png
       - assets/driver/2.png

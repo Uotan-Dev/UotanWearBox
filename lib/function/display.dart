@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -22,6 +24,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
   double widthValue = 1080; // 初始化滑块的宽度值
   double heightValue = 1920; // 初始化滑块的高度值
   bool isLoading = true; // 用于控制加载动画的显示
+  bool _connected = true; // 设备是否已连接；未连接时显示提示而不是设置项
 
   bool _initialized = false;
 
@@ -45,7 +48,12 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     bool isConnected = await _isDeviceConnected();
     if (!mounted) return;
     if (!isConnected) {
-      _shownoconnectDialog(l10n.displayDeviceNotConnectedMessage);
+      // 结束加载状态，否则返回按钮与系统返回会一直被禁用
+      setState(() {
+        isLoading = false;
+        _connected = false;
+      });
+      _shownoconnectDialog(l10n.deviceNotConnectedMessage);
     } else {
       await _fetchCurrentDPI(); // 获取当前DPI
       await _fetchCurrentResolution(); // 获取当前分辨率
@@ -122,7 +130,9 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     final l10n = context.l10n;
     return WillPopScope(
       onWillPop: () async => !isLoading, // 如果正在加载则禁止返回
-      child: Scaffold(
+      child: isNarrowLayout(context)
+          ? _buildNarrow(context)
+          : Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(90.0), // 设置AppBar的高度
           child: Padding(
@@ -169,6 +179,9 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
                   color: context.palette.text,
                 ),
               )
+            : !_connected
+            // 未连接：提示由弹窗给出，页面留空
+            ? const SizedBox.shrink()
             : Padding(
                 padding: const EdgeInsets.all(20.0), // 设置页面内边距
                 child: Column(
@@ -184,6 +197,143 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
       ),
     );
   }
+
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    return MiuixTitledPage(
+      title: l10n.displayPageTitle,
+      showBackButton: true,
+      // 加载中禁止返回（与宽屏一致）
+      onBackPressed: isLoading ? () {} : null,
+      body: Builder(
+        builder: (context) {
+          if (isLoading || !_connected) {
+            // 内容不足一屏也包在滚动视图中，标题栏可随回弹折叠
+            return LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  // 未连接：提示由弹窗给出，页面留空
+                  child: isLoading
+                      ? const Center(child: MiuixInfiniteProgressIndicator())
+                      : null,
+                ),
+              ),
+            );
+          }
+          final String currentDpi = currentDPI.isEmpty
+              ? l10n.displayValueUnavailable
+              : currentDPI;
+          final String currentRes = currentResolution.isEmpty
+              ? l10n.displayValueUnavailable
+              : currentResolution;
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            children: [
+              _narrowCard(
+                [
+                  MiuixSliderPreference(
+                    title: l10n.displayDpiLabel,
+                    summary: l10n.displayCurrentDpi(currentDpi),
+                    valueText: dpiValue.toInt().toString(),
+                    value: dpiValue,
+                    min: 120,
+                    max: 640,
+                    steps: 51,
+                    onValueChange: (double v) =>
+                        setState(() => dpiValue = v.roundToDouble()),
+                  ),
+                ],
+                onReset: _resetDPI,
+                applyText: l10n.displayApplyDpiButton,
+                onApply: () => _setDPI(dpiValue.toInt().toString()),
+              ),
+              const SizedBox(height: 12),
+              _narrowCard(
+                [
+                  MiuixSliderPreference(
+                    title: l10n.displayWidthLabel,
+                    summary: l10n.displayCurrentResolution(currentRes),
+                    valueText: widthValue.toInt().toString(),
+                    value: widthValue,
+                    min: 180,
+                    max: 2560,
+                    steps: 207,
+                    onValueChange: (double v) =>
+                        setState(() => widthValue = v.roundToDouble()),
+                  ),
+                  MiuixSliderPreference(
+                    title: l10n.displayHeightLabel,
+                    valueText: heightValue.toInt().toString(),
+                    value: heightValue,
+                    min: 100,
+                    max: 3840,
+                    steps: 303,
+                    onValueChange: (double v) =>
+                        setState(() => heightValue = v.roundToDouble()),
+                  ),
+                ],
+                onReset: _resetResolution,
+                applyText: l10n.displayApplyResolutionButton,
+                onApply: () => _setResolution(
+                    '${widthValue.toInt()}x${heightValue.toInt()}'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // miuix 卡片：滑块行 + 底部"恢复默认 / 应用"按钮
+  Widget _narrowCard(
+    List<Widget> rows, {
+    required VoidCallback onReset,
+    required String applyText,
+    required VoidCallback onApply,
+  }) {
+    return MiuixCard(
+      insideMargin: EdgeInsets.zero,
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(
+          shape: MiuixSquircleBorder(
+            cornerRadius: MiuixCardDefaults.cornerRadius,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ...rows,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: MiuixButton(
+                      onPressed: onReset,
+                      child: Text(context.l10n.displayResetDefaultButton),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: MiuixButton(
+                      onPressed: onApply,
+                      colors: MiuixButtonDefaults.buttonColorsPrimary(context),
+                      child: Text(applyText),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------- 宽屏 ----------
 
   // 构建DPI设置卡片
   Widget _buildDpiCard(BuildContext context) {
@@ -429,7 +579,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
         final l10n = context.l10n;
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface, // 弹窗背景颜色
-          title: Text(l10n.installNoDeviceTitle),
+          title: Text(l10n.deviceNotConnectedTitle),
           content: Text(message, style: TextStyle(color: context.palette.text)),
           actions: [
             MiuixDialogButton(
@@ -471,7 +621,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
         _showErrorDialog(context.l10n.displayDpiSetFailure(e.toString()));
       }
     } else {
-      _shownoconnectDialog(context.l10n.displayDeviceNotConnectedMessage);
+      _shownoconnectDialog(context.l10n.deviceNotConnectedMessage);
     }
   }
 
@@ -488,7 +638,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             context.l10n.displayResolutionSetFailure(e.toString()));
       }
     } else {
-      _shownoconnectDialog(context.l10n.displayDeviceNotConnectedMessage);
+      _shownoconnectDialog(context.l10n.deviceNotConnectedMessage);
     }
   }
 
@@ -504,7 +654,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
         _showErrorDialog(context.l10n.displayDpiResetFailure(e.toString()));
       }
     } else {
-      _shownoconnectDialog(context.l10n.displayDeviceNotConnectedMessage);
+      _shownoconnectDialog(context.l10n.deviceNotConnectedMessage);
     }
   }
 
@@ -521,7 +671,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
             context.l10n.displayResolutionResetFailure(e.toString()));
       }
     } else {
-      _shownoconnectDialog(context.l10n.displayDeviceNotConnectedMessage);
+      _shownoconnectDialog(context.l10n.deviceNotConnectedMessage);
     }
   }
 

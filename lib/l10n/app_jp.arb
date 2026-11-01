@@ -17,6 +17,24 @@
   "settingsSectionFaq": "よくある質問",
   "settingsSectionAgreements": "利用規約",
   "settingsSectionVisit": "公式サイトへ",
+  "settingsSectionAbout": "情報",
+  "settingsAboutTitle": "柚坛手表助手について",
+  "settingsAppearanceTitle": "表示",
+  "settingsAppearanceSubtitle": "言語とダークモード",
+  "settingsFeaturesTitle": "機能",
+  "settingsFeaturesSubtitle": "オプション機能のオン / オフ",
+  "featuresAppCenterTitle": "アプリセンターを有効にする",
+  "featuresAppCenterSubtitle": "ナビゲーションに「アプリ」ページを表示し、ウォッチアプリを閲覧・インストールできます",
+  "aboutLicensesTitle": "オープンソースライセンス",
+  "aboutWithdrawConsentTitle": "プライバシーポリシーへの同意を撤回",
+  "withdrawConsentMessage": "同意を撤回するとアプリは終了します。次回起動時に利用規約とプライバシーポリシーへの同意が再度必要になります。",
+  "withdrawConsentConfirm": "撤回して終了",
+  "consentDialogTitle": "利用規約とプライバシーポリシー",
+  "consentDialogMessage": "柚坛手表助手へようこそ。ご利用の前に、以下の内容をお読みいただき同意してください：",
+  "consentDisagree": "同意せずに終了",
+  "consentAgree": "同意する",
+  "aboutIcpLabel": "ICP 届出番号",
+  "aboutSectionFiling": "届出情報",
   "settingsFaqTitle": "よくある質問",
   "settingsFaqSubtitle": "使用方法・接続・操作に問題がある場合は、まずこちらをご確認ください。",
   "settingsDonateTitle": "寄付",
@@ -299,8 +317,6 @@
   "installApptoWatch": "アプリ（APK）をスマートウォッチにインストール",
   "selectApptoInstall": "インストールする APK を選択",
   "installingWaiting": "インストール中です…しばらくお待ちください。",
-  "installNoDeviceTitle": "デバイスが未接続",
-  "installNoDeviceMessage": "デバイスが検出されません。接続状態をご確認ください。",
   "installSuccessTitle": "インストール完了",
   "installSuccessMessage": "アプリが正常にインストールされました！",
   "installFailureTitle": "インストール失敗",
@@ -321,10 +337,9 @@
   "installNoFileSelected": "ファイルが選択されていません。",
   "commonErrorTitle": "エラー",
   "commonNoticeTitle": "通知",
+  "deviceNotConnectedTitle": "デバイス未接続",
+  "deviceNotConnectedMessage": "デバイスが検出されません。ウォッチが接続され、USB デバッグが有効になっていることを確認してください。",
   "buttonPageTitle": "キー操作シミュレーター",
-  "buttonDeviceNotConnectedTitle": "デバイス未接続",
-  "buttonDeviceNotConnectedMessage": "デバイスが PC に接続され、USB デバッグが有効かご確認ください。",
-  "buttonConnectFirstMessage": "まずデバイスを接続してください。",
   "buttonSendKeySuccess": "キーコード {keycode} を送信しました。",
   "@buttonSendKeySuccess": {
     "placeholders": {
@@ -354,7 +369,6 @@
   "displayPageTitle": "表示設定",
   "displayValueUnknown": "取得不可",
   "displayValueUnavailable": "利用できません",
-  "displayDeviceNotConnectedMessage": "デバイスが検出されません。接続を確認してください。",
   "displayErrorCheckingConnection": "デバイス接続を確認できません: {error}",
   "@displayErrorCheckingConnection": {
     "placeholders": {
@@ -441,7 +455,6 @@
       "error": {}
     }
   },
-  "appManageDeviceDisconnected": "デバイスが切断されました。",
   "appManageTooltipUnfreeze": "解凍",
   "appManageTooltipFreeze": "凍結",
   "appManageTooltipExportApk": "APK を抽出",
@@ -635,7 +648,6 @@
       "error": {}
     }
   },
-  "typeNoDeviceMessage": "デバイスが検出されません。接続をご確認ください。",
   "typeEmptyTextMessage": "テキストを入力してください。",
   "typeSendingProgress": "送信中…",
   "typePermissionDenied": "権限がありません。「USB デバッグ（インストール設定）」を有効にして再度お試しください。",

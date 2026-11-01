@@ -1,4 +1,5 @@
 import '../miuix_dialog.dart';
+import '../miuix_titled_page.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'package:watch_assistant/l10n/l10n.dart';
@@ -8,6 +9,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_miuix/miuix.dart';
 
 class FlashToolPage extends StatefulWidget {
   const FlashToolPage({super.key});
@@ -76,62 +78,280 @@ class _FlashToolPageState extends State<FlashToolPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async => !_isBusy,
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(90.0),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: GestureDetector(
-              onPanStart: (_) => startWindowDrag(),
-              child: Container(
-                color: Colors.transparent,
-                padding: const EdgeInsets.symmetric(horizontal: 18),
-                child: Row(
-                  children: <Widget>[
-                    IconButton(
-                      icon: Icon(Icons.arrow_back,
-                          color: context.palette.text, size: 20),
-                      onPressed: _isBusy ? null : () => Navigator.pop(context),
+      child: isNarrowLayout(context)
+          ? _buildNarrowPage(context)
+          : Scaffold(
+              appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(90.0),
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 40),
+                  child: GestureDetector(
+                    onPanStart: (_) => startWindowDrag(),
+                    child: Container(
+                      color: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(horizontal: 18),
+                      child: Row(
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(Icons.arrow_back,
+                                color: context.palette.text, size: 20),
+                            onPressed:
+                                _isBusy ? null : () => Navigator.pop(context),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            context.l10n.flashPageTitle,
+                            style: TextStyle(
+                              color: context.palette.text,
+                              fontSize: 26,
+                              fontFamily: 'MiSansLight',
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(width: 5),
-                    Text(
-                      context.l10n.flashPageTitle,
-                      style: TextStyle(
-                        color: context.palette.text,
-                        fontSize: 26,
-                        fontFamily: 'MiSansLight',
+                  ),
+                ),
+              ),
+              body: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: <Widget>[
+                            _buildPresetSection(),
+                            const SizedBox(height: 8),
+                            SizedBox(
+                              height: 230,
+                              child: _buildLogSection(),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
-          child: Column(
-            children: <Widget>[
-              Expanded(
+    );
+  }
+
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrowPage(BuildContext context) {
+    final l10n = context.l10n;
+    return MiuixTitledPage(
+      title: l10n.flashPageTitle,
+      showBackButton: true,
+      // 刷入过程中禁止返回
+      onBackPressed: _isBusy ? () {} : null,
+      body: Builder(
+        builder: (context) => ListView(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          children: <Widget>[
+            // 预置分区：每行为分区名 + 已选文件，点击选择文件，右侧刷入
+            _narrowCard(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  for (final String partition in <String>[
+                    ..._leftPresetPartitions,
+                    ..._rightPresetPartitions,
+                  ])
+                    _buildNarrowPartitionRow(context, partition),
+                  // 自定义分区：点击后在弹窗中输入分区名，再选择镜像并确认刷入
+                  MiuixArrowPreference(
+                    title: l10n.flashCustomPartition,
+                    summary: _customPartitionController.text.trim().isEmpty
+                        ? null
+                        : _customPartitionController.text.trim(),
+                    enabled: !_isBusy,
+                    onClick: _pickAndFlashCustom,
+                  ),
+                ],
+              ),
+            ),
+            _narrowSectionTitle(context, l10n.flashQuickActions),
+            _narrowCard(
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  MiuixArrowPreference(
+                    title: l10n.flashDisableVbmeta,
+                    enabled: !_isBusy,
+                    onClick: _disableVbmeta,
+                  ),
+                  MiuixArrowPreference(
+                    title: l10n.flashSwitchSlot,
+                    enabled: !_isBusy,
+                    onClick: _switchActiveSlot,
+                  ),
+                ],
+              ),
+            ),
+            _narrowSectionTitle(context, l10n.flashLogTitle),
+            _narrowCard(
+              SizedBox(
+                height: 230,
                 child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      _buildPresetSection(),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        height: 230,
-                        child: _buildLogSection(),
-                      ),
-                    ],
+                  controller: _logScrollController,
+                  padding: const EdgeInsets.all(16),
+                  child: SelectableText(
+                    _logs.isEmpty ? l10n.flashNoLogs : _logs.join('\n'),
+                    style: TextStyle(
+                      fontFamily: 'Consolas',
+                      fontSize: 12,
+                      color: MiuixTheme.of(context).colors.onBackground,
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildNarrowPartitionRow(BuildContext context, String partition) {
+    final TextEditingController controller = _presetPathControllers[partition]!;
+    return MiuixArrowPreference(
+      title: _formatPartitionLabel(partition),
+      summary: _fileName(controller.text),
+      enabled: !_isBusy,
+      onClick: () => _pickAndFlash(partition, controller),
+    );
+  }
+
+  // 窄屏一步操作：选择镜像 → 确认 → 刷入
+  Future<void> _pickAndFlash(
+    String partition,
+    TextEditingController pathController,
+  ) async {
+    if (_isBusy) {
+      return;
+    }
+    await _pickImageForController(pathController);
+    final String path = pathController.text.trim();
+    if (path.isEmpty || !mounted) {
+      return;
+    }
+    final bool confirmed = await _confirmFlash(partition, path);
+    if (confirmed) {
+      await _flashPartition(partition, path);
+    }
+  }
+
+  Future<void> _pickAndFlashCustom() async {
+    if (_isBusy) {
+      return;
+    }
+    final String? partition = await _askCustomPartition();
+    if (partition == null || !mounted) {
+      return;
+    }
+    if (partition.isEmpty) {
+      _showErrorDialog(context.l10n.flashEnterPartition);
+      return;
+    }
+    setState(() {});
+    await _pickAndFlash(partition, _customPathController);
+  }
+
+  // miuix 弹窗输入自定义分区名；取消返回 null
+  Future<String?> _askCustomPartition() {
+    return showMiuixDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => MiuixAlertDialog(
+        title: Text(context.l10n.flashCustomPartition),
+        content: MiuixTextField(
+          label: context.l10n.flashTargetPartition,
+          controller: _customPartitionController,
+          singleLine: true,
+          onSubmitted: (_) => Navigator.of(dialogContext)
+              .pop(_customPartitionController.text.trim()),
+        ),
+        actions: <Widget>[
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext)
+                .pop(_customPartitionController.text.trim()),
+            child: Text(context.l10n.dialogConfirm),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _confirmFlash(String partition, String path) async {
+    final bool? result = await showMiuixDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => MiuixAlertDialog(
+        title: Text(context.l10n.flashActionPartition(partition)),
+        content: Text(_fileName(path) ?? path),
+        actions: <Widget>[
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.flashAction),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
+  }
+
+  // 已选文件的文件名；未选择时不显示副标题
+  String? _fileName(String path) {
+    final String trimmed = path.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+    return trimmed.split(RegExp(r'[\\/]')).last;
+  }
+
+  // 分组标题（与首页窄屏一致）
+  Widget _narrowSectionTitle(BuildContext context, String title) {
+    final MiuixThemeData theme = MiuixTheme.of(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        MiuixBasicComponentDefaults.insideMargin.left,
+        16,
+        MiuixBasicComponentDefaults.insideMargin.right,
+        8,
+      ),
+      child: MiuixText(
+        title,
+        style: theme.textStyles.footnote1,
+        color: theme.colors.onBackgroundVariant,
+      ),
+    );
+  }
+
+  // miuix 卡片，按超椭圆圆角裁剪内容，避免行的按压底色露出直角
+  Widget _narrowCard(Widget child) {
+    return MiuixCard(
+      insideMargin: EdgeInsets.zero,
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(
+          shape: MiuixSquircleBorder(
+            cornerRadius: MiuixCardDefaults.cornerRadius,
+          ),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  // ---------- 宽屏 ----------
 
   Widget _buildPresetSection() {
     return Card(
@@ -272,8 +492,7 @@ class _FlashToolPageState extends State<FlashToolPage> {
               children: <Widget>[
                 Text(
                   context.l10n.flashLogTitle,
-                  style:
-                      TextStyle(fontSize: 20, fontFamily: 'MiSansLight'),
+                  style: TextStyle(fontSize: 20, fontFamily: 'MiSansLight'),
                 ),
                 const SizedBox(height: 10),
                 Expanded(
@@ -320,8 +539,7 @@ class _FlashToolPageState extends State<FlashToolPage> {
                   children: <Widget>[
                     Text(
                       context.l10n.flashQuickActions,
-                      style: TextStyle(
-                          fontSize: 20, fontFamily: 'MiSansLight'),
+                      style: TextStyle(fontSize: 20, fontFamily: 'MiSansLight'),
                     ),
                     const SizedBox(height: 10),
                     SizedBox(
@@ -473,8 +691,9 @@ class _FlashToolPageState extends State<FlashToolPage> {
     }
 
     try {
-      final ProcessResult result =
-          await Process.run(fastbootPath, <String>['getvar', 'current-slot'], environment: toolEnvironment);
+      final ProcessResult result = await Process.run(
+          fastbootPath, <String>['getvar', 'current-slot'],
+          environment: toolEnvironment);
       final String mergedOutput =
           '${result.stdout}\n${result.stderr}'.toLowerCase();
       final RegExpMatch? match =
@@ -518,7 +737,8 @@ class _FlashToolPageState extends State<FlashToolPage> {
     _addLog('> fastboot ${args.join(' ')}');
 
     try {
-      final Process process = await Process.start(fastbootPath, args, environment: toolEnvironment);
+      final Process process =
+          await Process.start(fastbootPath, args, environment: toolEnvironment);
       process.stdout.transform(utf8.decoder).listen(_appendProcessLog);
       process.stderr.transform(utf8.decoder).listen(_appendProcessLog);
 
@@ -543,8 +763,9 @@ class _FlashToolPageState extends State<FlashToolPage> {
 
   Future<bool> _ensureFastbootDeviceReady() async {
     try {
-      final ProcessResult result =
-          await Process.run(fastbootPath, <String>['devices'], environment: toolEnvironment);
+      final ProcessResult result = await Process.run(
+          fastbootPath, <String>['devices'],
+          environment: toolEnvironment);
       final String output = result.stdout.toString();
       final List<String> lines = output
           .split('\n')
@@ -628,7 +849,8 @@ class _FlashToolPageState extends State<FlashToolPage> {
                     return null;
                   },
                 ),
-                foregroundColor: MaterialStateProperty.all<Color>(context.palette.text),
+                foregroundColor:
+                    MaterialStateProperty.all<Color>(context.palette.text),
               ),
               onPressed: () => Navigator.of(context).pop(),
               child: Text(context.l10n.dialogOk),

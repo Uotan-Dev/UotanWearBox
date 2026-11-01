@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -29,8 +31,8 @@ class _ButtonPageState extends State<ButtonPage> {
     //     _isDeviceConnected = connected;
     //   });
     //   if (!connected) {
-    // //    _showMessage(context, l10n.buttonDeviceNotConnectedTitle,
-    //        l10n.buttonDeviceNotConnectedMessage);
+    // //    _showMessage(context, l10n.deviceNotConnectedTitle,
+    //        l10n.deviceNotConnectedMessage);
     //   }
     //   });
   }
@@ -38,6 +40,27 @@ class _ButtonPageState extends State<ButtonPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      // 窄屏：两列 miuix 按钮
+      return MiuixTitledPage(
+        title: l10n.buttonPageTitle,
+        showBackButton: true,
+        body: GridView.count(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 3,
+          children: [
+            for (final (String name, String keycode) in _keys(context))
+              MiuixButton(
+                onPressed: () => _sendAdbKey(keycode),
+                child: Text(name),
+              ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0),
@@ -90,9 +113,15 @@ class _ButtonPageState extends State<ButtonPage> {
     );
   }
 
-  List<Widget> _buildButtons(BuildContext context) {
+  // 按键名称与 keycode（窄屏 miuix 按钮使用）
+  List<(String, String)> _keys(BuildContext context) => [
+        for (final Map<String, String> button in _buttonData(context))
+          (button['name']!, button['keycode']!),
+      ];
+
+  List<Map<String, String>> _buttonData(BuildContext context) {
     final l10n = context.l10n;
-    final List<Map<String, String>> buttonData = [
+    return [
       {"name": l10n.buttonNameHome, "keycode": "3"},
       {"name": l10n.buttonNameBack, "keycode": "4"},
       {"name": l10n.buttonNamePower, "keycode": "26"},
@@ -108,6 +137,10 @@ class _ButtonPageState extends State<ButtonPage> {
       {"name": l10n.buttonNameScreenOn, "keycode": "224"},
       {"name": l10n.buttonNameScreenOff, "keycode": "223"},
     ];
+  }
+
+  List<Widget> _buildButtons(BuildContext context) {
+    final List<Map<String, String>> buttonData = _buttonData(context);
 
     return buttonData.map((button) {
       return _buildButton(
@@ -145,8 +178,8 @@ class _ButtonPageState extends State<ButtonPage> {
   Future<void> _sendAdbKey(String keycode) async {
     if (!_isDeviceConnected) {
       final l10n = context.l10n;
-      _showMessage(context, l10n.buttonDeviceNotConnectedTitle,
-          l10n.buttonConnectFirstMessage);
+      _showMessage(context, l10n.deviceNotConnectedTitle,
+          l10n.deviceNotConnectedMessage);
       return;
     }
 

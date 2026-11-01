@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -21,6 +23,9 @@ class _TypeTextPageState extends State<TypeTextPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      return _buildNarrow(context);
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0), // 设置AppBar的高度
@@ -172,6 +177,54 @@ class _TypeTextPageState extends State<TypeTextPage> {
     );
   }
 
+  // 窄屏：miuix 多行输入框 + 导入 / 清空 + 主色发送按钮
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    return MiuixTitledPage(
+      title: l10n.typePageTitle,
+      showBackButton: true,
+      body: Builder(
+        builder: (context) => ListView(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          children: [
+            MiuixTextField(
+              controller: _controller,
+              label: l10n.typeHint,
+              useLabelAsPlaceholder: true,
+              minLines: 8,
+              maxLines: 14,
+              keyboardType: TextInputType.multiline,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: MiuixButton(
+                    onPressed: _importTextFromFile,
+                    child: Text(l10n.typeImportButton),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: MiuixButton(
+                    onPressed: _controller.clear,
+                    child: Text(l10n.typeClearButton),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            MiuixButton(
+              onPressed: _sendTextToDevice,
+              colors: MiuixButtonDefaults.buttonColorsPrimary(context),
+              child: Text(l10n.typeSendButton),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   // 导入文本文件的方法
   void _importTextFromFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -198,7 +251,10 @@ class _TypeTextPageState extends State<TypeTextPage> {
     // 检测设备是否连接
     bool isConnected = await _isDeviceConnected();
     if (!isConnected) {
-      _showMessageDialog(context.l10n.typeNoDeviceMessage);
+      _showMessageDialog(
+        context.l10n.deviceNotConnectedMessage,
+        title: context.l10n.deviceNotConnectedTitle,
+      );
       return;
     }
 
@@ -274,14 +330,14 @@ class _TypeTextPageState extends State<TypeTextPage> {
   }
 
   // 显示消息弹窗
-  void _showMessageDialog(String message) {
+  void _showMessageDialog(String message, {String? title}) {
     showMiuixDialog(
       context: context,
       builder: (BuildContext context) {
         final l10n = context.l10n;
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface, // 弹窗背景颜色
-          title: Text(l10n.commonNoticeTitle),
+          title: Text(title ?? l10n.commonNoticeTitle),
           content: Text(message, style: TextStyle(color: context.palette.text)),
           actions: [
             MiuixDialogButton(

@@ -81,6 +81,8 @@ class _MiuixTitledPageState extends State<MiuixTitledPage> {
                 ),
               ),
             ),
+            // 二级页面：标题与内容之间留出间距
+            if (widget.showBackButton) const SizedBox(height: 12),
             Expanded(
               child: MiuixScrollBehaviorListener(
                 behavior: _behavior,
@@ -98,6 +100,115 @@ class _MiuixTitledPageState extends State<MiuixTitledPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 窄屏分组标题（miuix 小号次要文字，与卡片内行的左边距对齐）
+class MiuixSectionTitle extends StatelessWidget {
+  const MiuixSectionTitle(this.title, {super.key, this.top = 16});
+
+  final String title;
+
+  /// 与上方内容的间距；作为页面第一个元素时传 0
+  final double top;
+
+  @override
+  Widget build(BuildContext context) {
+    final MiuixThemeData theme = MiuixTheme.of(context);
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        MiuixBasicComponentDefaults.insideMargin.left,
+        top,
+        MiuixBasicComponentDefaults.insideMargin.right,
+        8,
+      ),
+      child: MiuixText(
+        title,
+        style: theme.textStyles.footnote1,
+        color: theme.colors.onBackgroundVariant,
+      ),
+    );
+  }
+}
+
+/// 窄屏分组卡片：一组 miuix 行放在同一张卡片里，按超椭圆圆角裁剪，
+/// 避免行的按压 / 悬停底色露出直角
+class MiuixGroupCard extends StatelessWidget {
+  const MiuixGroupCard({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return MiuixCard(
+      insideMargin: EdgeInsets.zero,
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(
+          shape: MiuixSquircleBorder(
+            cornerRadius: MiuixCardDefaults.cornerRadius,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
+        ),
+      ),
+    );
+  }
+}
+
+/// 窄屏数值行：左侧名称（可带说明），右侧灰色数值，可在下方附加进度条等内容
+class MiuixValueRow extends StatelessWidget {
+  const MiuixValueRow({
+    super.key,
+    required this.title,
+    required this.value,
+    this.summary,
+    this.bottom,
+  });
+
+  final String title;
+  final String value;
+  final String? summary;
+  final Widget? bottom;
+
+  /// 把 "名称: 数值" / "名称：数值" 形式的本地化文本拆成行
+  factory MiuixValueRow.fromLabel(String text, {Key? key}) {
+    final int i = text.indexOf(RegExp('[:：]'));
+    if (i < 0) {
+      return MiuixValueRow(key: key, title: text.trim(), value: '');
+    }
+    return MiuixValueRow(
+      key: key,
+      title: text.substring(0, i).trim(),
+      value: text.substring(i + 1).trim(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final MiuixThemeData theme = MiuixTheme.of(context);
+    return MiuixBasicComponent(
+      title: title,
+      summary: summary,
+      bottomAction: bottom,
+      endActions: <Widget>[
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.sizeOf(context).width * 0.5,
+          ),
+          child: Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textStyles.body2.copyWith(
+              color: theme.colors.onSurfaceVariantActions,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

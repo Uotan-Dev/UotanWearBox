@@ -8,7 +8,8 @@ import 'package:window_manager/window_manager.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'adb_device_info.dart';
-import 'platform_support.dart';
+import 'app_prefs.dart';
+import 'privacy_consent.dart';
 import 'app_sidebar.dart';
 import 'page1.dart';
 import 'page2.dart';
@@ -36,14 +37,40 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WindowListener {
   int _selectedIndex = 0;
+
+  // 当前显示的导航项；应用中心可在设置 → 功能中关闭
+  late List<String> _tabs = _buildTabs();
+
+  static List<String> _buildTabs() => [
+        'home',
+        'features',
+        if (appCenterEnabled.value) 'store',
+        'settings',
+      ];
+
+  String get _selectedTab => _tabs[_selectedIndex];
+
+  // 开关应用中心后保持停留在原来的导航项上
+  void _onAppCenterChanged() {
+    final String current = _selectedTab;
+    setState(() {
+      _tabs = _buildTabs();
+      final int index = _tabs.indexOf(current);
+      _selectedIndex = index < 0 ? 0 : index;
+      // 页数变化，窄屏分页按新位置重建
+      _releasePageController();
+    });
+  }
+
   List<AdbDeviceInfo> _devices = []; // 用于存储设备信息
   double currentVersion = 17.0; // 当前应用版本号
-  bool _isCheckingUpdate = true; // 是否正在检查更新的状态
+  bool _isCheckingUpdate = true; // 是否显示启动页
 
   @override
   void initState() {
     super.initState();
     windowManager.addListener(this);
+    appCenterEnabled.addListener(_onAppCenterChanged);
     checkAdbDevicesPeriodically(
       setState: setState,
       onDevicesUpdated: (devices) {
@@ -52,43 +79,35 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
         });
       },
     );
-    _checkNetworkAndUpdate(); // 初始化时检查网络和版本更新
+    _finishStartup();
   }
 
   @override
   void dispose() {
     windowManager.removeListener(this);
+    appCenterEnabled.removeListener(_onAppCenterChanged);
     _pageController?.dispose();
     super.dispose();
   }
 
   final List<Widget> _pages = [];
 
-  // 检查网络连接并访问URL
-  Future<void> _checkNetworkAndUpdate() async {
-    await Future.delayed(const Duration(milliseconds: 500)); // 修改延迟为0.5秒
-    setState(() {
-      _isCheckingUpdate = true; // 开始检查时显示进度条
-    });
-
-    try {
-      // 尝试发送请求到 wear.gnayoah.com
-      final response = await http.get(Uri.parse('https://wear.gnayoah.com'));
-      if (response.statusCode == 200) {
-        // 网站访问正常，继续检查版本更新
-        await _checkForUpdates();
-      } else {
-        // 无法访问，显示错误提示
-        _showNoNetworkDialog();
-      }
-    } catch (e) {
-      // 捕获异常，显示网络错误提示
-      _showNoNetworkDialog();
-    } finally {
-      setState(() {
-        _isCheckingUpdate = false; // 检查完成后隐藏进度条
-      });
+  // 短暂显示启动页后进入主界面
+  Future<void> _finishStartup() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) {
+      return;
     }
+    setState(() {
+      _isCheckingUpdate = false;
+    });
+    // 首次使用需先同意用户协议和隐私政策（不同意则退出），之后才访问网络
+    await ensurePrivacyConsent(context);
+    if (!mounted) {
+      return;
+    }
+    // 进入主界面后在后台检查更新，不阻塞使用；仅有新版本时弹出提示，失败时静默
+    _checkForUpdates();
   }
 
   Future<void> _refreshDevicesNow() async {
@@ -132,7 +151,9 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
             .trim();
 
         if (remoteVersion > currentVersion) {
-          _showUpdateDialog(remoteVersion, releaseDate);
+          if (mounted) {
+            _showUpdateDialog(remoteVersion, releaseDate);
+          }
           return UpdateCheckResult.available;
         }
         return UpdateCheckResult.upToDate;
@@ -201,63 +222,6 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
     );
   }
 
-  // 显示无网络连接或无法访问的提示框
-  void _showNoNetworkDialog([String? message]) {
-    showMiuixDialog(
-      context: context,
-      barrierDismissible: false, // 设置为false，禁止点击对话框外部区域取消
-      builder: (BuildContext context) {
-        final l10n = context.l10n;
-        return MiuixAlertDialog(
-          backgroundColor: context.palette.surface, // 弹窗背景颜色
-          title: Text(l10n.networkErrorTitle),
-          content: Text(message ?? l10n.networkErrorMessage),
-          actions: [
-            MiuixDialogButton(
-              style: ButtonStyle(
-                overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed) ||
-                        states.contains(MaterialState.hovered)) {
-                      return context.palette.button; // 点击或悬浮时的背景颜色
-                    }
-                    return null; // 默认状态下不更改颜色
-                  },
-                ),
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    context.palette.text), // 文本颜色
-              ),
-              child: Text(l10n.networkErrorExit),
-              onPressed: () {
-                closeApp();
-              },
-            ),
-            MiuixDialogButton(
-              style: ButtonStyle(
-                overlayColor: MaterialStateProperty.resolveWith<Color?>(
-                  (Set<MaterialState> states) {
-                    if (states.contains(MaterialState.pressed) ||
-                        states.contains(MaterialState.hovered)) {
-                      return context.palette.button; // 点击或悬浮时的背景颜色
-                    }
-                    return null; // 默认状态下不更改颜色
-                  },
-                ),
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    context.palette.text), // 文本颜色
-              ),
-              child: Text(l10n.networkErrorRetry),
-              onPressed: () {
-                Navigator.of(context).pop(); // 关闭对话框
-                _checkNetworkAndUpdate(); // 重新检查网络
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   // 打开浏览器跳转到指定URL
   void _launchURL() async {
     const url = 'https://wear.gnayoah.com';
@@ -272,13 +236,17 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   static const double _narrowLayoutBreakpoint = 600;
 
   // 每个导航项拥有独立的嵌套 Navigator，二级页面在内容区域内打开，侧边栏保持显示
-  final List<GlobalKey<NavigatorState>> _navigatorKeys =
-      List.generate(4, (_) => GlobalKey<NavigatorState>());
+  final Map<String, GlobalKey<NavigatorState>> _navigatorKeys = {
+    for (final String tab in ['home', 'features', 'store', 'settings'])
+      tab: GlobalKey<NavigatorState>(),
+  };
 
   void _onDestinationSelected(int index) {
     if (index == _selectedIndex) {
       // 再次点击当前导航项时返回该栏目的首页
-      _navigatorKeys[index].currentState?.popUntil((route) => route.isFirst);
+      _navigatorKeys[_tabs[index]]!
+          .currentState
+          ?.popUntil((route) => route.isFirst);
       return;
     }
     setState(() {
@@ -339,10 +307,10 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   // 宽屏内容区域：一级页面作为嵌套 Navigator 的根页面
   Widget _buildContent() {
     return Navigator(
-      key: _navigatorKeys[_selectedIndex],
+      key: _navigatorKeys[_selectedTab],
       pages: [
         MaterialPage(
-          key: ValueKey('tab_$_selectedIndex'),
+          key: ValueKey('tab_$_selectedTab'),
           child: _pages[_selectedIndex],
         ),
       ],
@@ -355,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   // 快速来回切换时两份同 key 的页面同时存在会报错
   Widget _buildTabTransition(Widget child) {
     return TweenAnimationBuilder<double>(
-      key: ValueKey<int>(_selectedIndex),
+      key: ValueKey<String>(_selectedTab),
       tween: Tween<double>(begin: 0, end: 1),
       duration: kPageEnterDuration,
       curve: kPageEnterCurve,
@@ -365,28 +333,31 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   }
 
   // 侧边栏与底部导航栏共用的导航项
-  List<AppSidebarItem> _navItems(BuildContext context) => [
-        AppSidebarItem(
-          icon: 'home',
-          selectedIcon: 'home_filled',
-          label: context.l10n.navigationHome,
-        ),
-        AppSidebarItem(
-          icon: 'features',
-          selectedIcon: 'features_filled',
-          label: context.l10n.navigationFeatures,
-        ),
-        AppSidebarItem(
-          icon: 'store',
-          selectedIcon: 'store_filled',
-          label: context.l10n.navigationStore,
-        ),
-        AppSidebarItem(
-          icon: 'settings',
-          selectedIcon: 'settings_filled',
-          label: context.l10n.navigationAbout,
-        ),
-      ];
+  List<AppSidebarItem> _navItems(BuildContext context) {
+    final Map<String, AppSidebarItem> items = {
+      'home': AppSidebarItem(
+        icon: 'home',
+        selectedIcon: 'home_filled',
+        label: context.l10n.navigationHome,
+      ),
+      'features': AppSidebarItem(
+        icon: 'features',
+        selectedIcon: 'features_filled',
+        label: context.l10n.navigationFeatures,
+      ),
+      'store': AppSidebarItem(
+        icon: 'store',
+        selectedIcon: 'store_filled',
+        label: context.l10n.navigationStore,
+      ),
+      'settings': AppSidebarItem(
+        icon: 'settings',
+        selectedIcon: 'settings_filled',
+        label: context.l10n.navigationAbout,
+      ),
+    };
+    return [for (final String tab in _tabs) items[tab]!];
+  }
 
   // 宽屏布局：左侧导航栏
   Widget _buildWideLayout(BuildContext context) {
@@ -411,7 +382,14 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
     // 窄屏下二级页面仍全屏打开，不保留底部导航栏
     return Column(
       children: [
-        Expanded(child: _buildNarrowPager()),
+        Expanded(
+          // 页面位于导航栏上方，手势导航条的高度由导航栏处理，不再传给页面
+          child: MediaQuery.removePadding(
+            context: context,
+            removeBottom: true,
+            child: _buildNarrowPager(),
+          ),
+        ),
         AppBottomBar(
           items: _navItems(context),
           selectedIndex: _selectedIndex,
@@ -425,20 +403,25 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   Widget build(BuildContext context) {
     _pages
       ..clear()
-      ..add(Page1(
-        devices: _devices,
-        onRefreshDevices: _refreshDevicesNow,
-      ))
-      ..add(const Page2())
-      ..add(const StorePage())
-      ..add(Page3(
-        onLocaleChanged: widget.onLocaleChanged,
-        currentLocale: widget.locale,
-        onThemeModeChanged: widget.onThemeModeChanged,
-        themeMode: widget.themeMode,
-        currentVersion: '$currentVersion',
-        onCheckUpdate: _checkForUpdates,
-      ));
+      ..addAll([
+        for (final String tab in _tabs)
+          switch (tab) {
+            'home' => Page1(
+                devices: _devices,
+                onRefreshDevices: _refreshDevicesNow,
+              ),
+            'features' => const Page2(),
+            'store' => const StorePage(),
+            _ => Page3(
+                onLocaleChanged: widget.onLocaleChanged,
+                currentLocale: widget.locale,
+                onThemeModeChanged: widget.onThemeModeChanged,
+                themeMode: widget.themeMode,
+                currentVersion: '$currentVersion',
+                onCheckUpdate: _checkForUpdates,
+              ),
+          },
+      ]);
 
     return Scaffold(
       body: AnimatedSwitcher(
@@ -448,36 +431,11 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
         },
         child: _isCheckingUpdate
             ? Center(
-                key: ValueKey('loading'), // 唯一键值
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center, // 垂直居中对齐
-                  children: [
-                    /// const SizedBox(height: 80),
-                    /// Image.asset(
-                    //   'assets/logo2.png', // 加载 logo
-                    //   width: 120, // 设置 Logo 的宽度
-                    //   height: 120, // 设置 Logo 的高度
-                    //  ),
-                    //  const SizedBox(height: 80),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    Image.asset(
-                      'assets/new_logo.png',
-                      height: 65,
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                    SizedBox(
-                      width: 20, // 设置进度条的宽度
-                      height: 20, // 设置进度条的高度
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2, // 设置进度条的粗细，默认是 4.0
-                        color: context.palette.text,
-                      ),
-                    ),
-                  ],
+                key: const ValueKey('loading'), // 唯一键值
+                child: Image.asset(
+                  'assets/logo2.png',
+                  width: 96,
+                  height: 96,
                 ),
               )
             : LayoutBuilder(

@@ -47,6 +47,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSectionVisit => 'Visit Website';
 
   @override
+  String get settingsSectionAbout => 'About';
+
+  @override
+  String get settingsAboutTitle => 'About Uotan WearBox';
+
+  @override
+  String get settingsAppearanceTitle => 'Display';
+
+  @override
+  String get settingsAppearanceSubtitle => 'Language and dark mode';
+
+  @override
+  String get settingsFeaturesTitle => 'Features';
+
+  @override
+  String get settingsFeaturesSubtitle => 'Turn optional features on or off';
+
+  @override
+  String get featuresAppCenterTitle => 'Enable App Center';
+
+  @override
+  String get featuresAppCenterSubtitle =>
+      'Show the Apps page in the navigation bar to browse and install watch apps';
+
+  @override
+  String get aboutLicensesTitle => 'Open source licenses';
+
+  @override
+  String get aboutWithdrawConsentTitle => 'Withdraw privacy policy consent';
+
+  @override
+  String get withdrawConsentMessage =>
+      'After withdrawing, the app will exit. You will need to read and accept the User Agreement and Privacy Policy again the next time you open it.';
+
+  @override
+  String get withdrawConsentConfirm => 'Withdraw and exit';
+
+  @override
+  String get consentDialogTitle => 'User Agreement and Privacy Policy';
+
+  @override
+  String get consentDialogMessage =>
+      'Welcome to Uotan WearBox. Before you start, please read and agree to the following:';
+
+  @override
+  String get consentDisagree => 'Disagree and exit';
+
+  @override
+  String get consentAgree => 'Agree';
+
+  @override
+  String get aboutIcpLabel => 'ICP filing number';
+
+  @override
+  String get aboutSectionFiling => 'Filing information';
+
+  @override
   String get settingsFaqTitle => 'Frequently Asked Questions';
 
   @override
@@ -565,12 +622,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installingWaiting => 'Installation in progress, please wait...';
 
   @override
-  String get installNoDeviceTitle => 'No device connected';
-
-  @override
-  String get installNoDeviceMessage => 'No device was detected. Please make sure the device is connected.';
-
-  @override
   String get installSuccessTitle => 'Install successful';
 
   @override
@@ -605,16 +656,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonNoticeTitle => 'Notice';
 
   @override
+  String get deviceNotConnectedTitle => 'Device not connected';
+
+  @override
+  String get deviceNotConnectedMessage =>
+      'No device detected. Make sure your watch is connected and USB debugging is enabled.';
+
+  @override
   String get buttonPageTitle => 'Button simulation';
-
-  @override
-  String get buttonDeviceNotConnectedTitle => 'Device not connected';
-
-  @override
-  String get buttonDeviceNotConnectedMessage => 'Please check that the device is connected to the computer and USB debugging is enabled.';
-
-  @override
-  String get buttonConnectFirstMessage => 'Please connect the device first.';
 
   @override
   String buttonSendKeySuccess(Object keycode) {
@@ -676,9 +725,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get displayValueUnavailable => 'Unavailable';
-
-  @override
-  String get displayDeviceNotConnectedMessage => 'No device detected. Please check the connection.';
 
   @override
   String displayErrorCheckingConnection(Object error) {
@@ -781,9 +827,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String appManageCannotFetch(Object error) {
     return 'Failed to load installed apps: $error';
   }
-
-  @override
-  String get appManageDeviceDisconnected => 'The device appears to be disconnected.';
 
   @override
   String get appManageTooltipUnfreeze => 'Unfreeze';
@@ -1025,9 +1068,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String typeImportFailure(Object error) {
     return 'Unable to import the text file: $error';
   }
-
-  @override
-  String get typeNoDeviceMessage => 'No device detected. Please check the connection.';
 
   @override
   String get typeEmptyTextMessage => 'Please enter some text.';

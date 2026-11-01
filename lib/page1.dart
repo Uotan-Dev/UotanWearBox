@@ -81,7 +81,8 @@ class _Page1State extends State<Page1> {
         ],
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            padding: EdgeInsets.fromLTRB(
+                12, 0, 12, 20 + MediaQuery.paddingOf(context).bottom),
             child: selectedDevice == null
                 ? _buildNoDeviceConnected(context)
                 : _buildDeviceInfo(

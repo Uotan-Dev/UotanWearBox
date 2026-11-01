@@ -47,6 +47,63 @@ class AppLocalizationsJa extends AppLocalizations {
   String get settingsSectionVisit => '公式サイトへ';
 
   @override
+  String get settingsSectionAbout => '情報';
+
+  @override
+  String get settingsAboutTitle => '柚坛手表助手について';
+
+  @override
+  String get settingsAppearanceTitle => '表示';
+
+  @override
+  String get settingsAppearanceSubtitle => '言語とダークモード';
+
+  @override
+  String get settingsFeaturesTitle => '機能';
+
+  @override
+  String get settingsFeaturesSubtitle => 'オプション機能のオン / オフ';
+
+  @override
+  String get featuresAppCenterTitle => 'アプリセンターを有効にする';
+
+  @override
+  String get featuresAppCenterSubtitle =>
+      'ナビゲーションに「アプリ」ページを表示し、ウォッチアプリを閲覧・インストールできます';
+
+  @override
+  String get aboutLicensesTitle => 'オープンソースライセンス';
+
+  @override
+  String get aboutWithdrawConsentTitle => 'プライバシーポリシーへの同意を撤回';
+
+  @override
+  String get withdrawConsentMessage =>
+      '同意を撤回するとアプリは終了します。次回起動時に利用規約とプライバシーポリシーへの同意が再度必要になります。';
+
+  @override
+  String get withdrawConsentConfirm => '撤回して終了';
+
+  @override
+  String get consentDialogTitle => '利用規約とプライバシーポリシー';
+
+  @override
+  String get consentDialogMessage =>
+      '柚坛手表助手へようこそ。ご利用の前に、以下の内容をお読みいただき同意してください：';
+
+  @override
+  String get consentDisagree => '同意せずに終了';
+
+  @override
+  String get consentAgree => '同意する';
+
+  @override
+  String get aboutIcpLabel => 'ICP 届出番号';
+
+  @override
+  String get aboutSectionFiling => '届出情報';
+
+  @override
   String get settingsFaqTitle => 'よくある質問';
 
   @override
@@ -565,12 +622,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get installingWaiting => 'インストール中です…しばらくお待ちください。';
 
   @override
-  String get installNoDeviceTitle => 'デバイスが未接続';
-
-  @override
-  String get installNoDeviceMessage => 'デバイスが検出されません。接続状態をご確認ください。';
-
-  @override
   String get installSuccessTitle => 'インストール完了';
 
   @override
@@ -605,16 +656,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get commonNoticeTitle => '通知';
 
   @override
+  String get deviceNotConnectedTitle => 'デバイス未接続';
+
+  @override
+  String get deviceNotConnectedMessage =>
+      'デバイスが検出されません。ウォッチが接続され、USB デバッグが有効になっていることを確認してください。';
+
+  @override
   String get buttonPageTitle => 'キー操作シミュレーター';
-
-  @override
-  String get buttonDeviceNotConnectedTitle => 'デバイス未接続';
-
-  @override
-  String get buttonDeviceNotConnectedMessage => 'デバイスが PC に接続され、USB デバッグが有効かご確認ください。';
-
-  @override
-  String get buttonConnectFirstMessage => 'まずデバイスを接続してください。';
 
   @override
   String buttonSendKeySuccess(Object keycode) {
@@ -676,9 +725,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get displayValueUnavailable => '利用できません';
-
-  @override
-  String get displayDeviceNotConnectedMessage => 'デバイスが検出されません。接続を確認してください。';
 
   @override
   String displayErrorCheckingConnection(Object error) {
@@ -781,9 +827,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String appManageCannotFetch(Object error) {
     return 'アプリ一覧を取得できません: $error';
   }
-
-  @override
-  String get appManageDeviceDisconnected => 'デバイスが切断されました。';
 
   @override
   String get appManageTooltipUnfreeze => '解凍';
@@ -1025,9 +1068,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String typeImportFailure(Object error) {
     return 'テキストファイルを読み込めませんでした: $error';
   }
-
-  @override
-  String get typeNoDeviceMessage => 'デバイスが検出されません。接続をご確認ください。';
 
   @override
   String get typeEmptyTextMessage => 'テキストを入力してください。';

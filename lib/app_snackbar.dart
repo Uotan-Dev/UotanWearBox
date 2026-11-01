@@ -1,3 +1,4 @@
+import 'app_sidebar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_miuix/miuix.dart';
 
@@ -22,14 +23,11 @@ Future<void> showAppSnackbar(
 class AppSnackbarHost extends StatelessWidget {
   const AppSnackbarHost({super.key});
 
-  // 窄屏底部导航栏（MiuixNavigationBar）的高度
-  static const double _bottomBarHeight = 64;
-
   @override
   Widget build(BuildContext context) {
     final AppPalette palette = context.palette;
     final double bottom = MediaQuery.paddingOf(context).bottom +
-        (isNarrowLayout(context) ? _bottomBarHeight : 0);
+        (isNarrowLayout(context) ? AppBottomBar.totalHeight : 0);
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: MiuixTheme(

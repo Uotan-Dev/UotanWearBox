@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -38,7 +40,7 @@ class _PairPageState extends State<PairPage> {
         });
         if (!connected) {
           final l10n = context.l10n;
-          _showMessage(context, l10n.buttonDeviceNotConnectedTitle, l10n.buttonDeviceNotConnectedMessage);
+          _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
         }
       });
     }
@@ -47,6 +49,40 @@ class _PairPageState extends State<PairPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      // 窄屏：四个步骤放在一张 miuix 卡片中，第 2、3 步可点击执行
+      return MiuixTitledPage(
+        title: l10n.pairingPageTitle,
+        showBackButton: true,
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          children: [
+            MiuixGroupCard(
+              children: [
+                MiuixBasicComponent(
+                  title: l10n.pairingStepTitle(1),
+                  summary: l10n.pairingStepDescription1,
+                ),
+                MiuixArrowPreference(
+                  title: l10n.pairingStepTitle(2),
+                  summary: l10n.pairingClearServicesButton,
+                  onClick: _clearGoogleServicesAndReboot,
+                ),
+                MiuixArrowPreference(
+                  title: l10n.pairingStepTitle(3),
+                  summary: l10n.pairingEnableBluetoothButton,
+                  onClick: _enableBluetoothDiscoverable,
+                ),
+                MiuixBasicComponent(
+                  title: l10n.pairingStepTitle(4),
+                  summary: l10n.pairingStepDescription4,
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0),
@@ -158,7 +194,7 @@ class _PairPageState extends State<PairPage> {
   Future<void> _clearGoogleServicesAndReboot() async {
     if (!_isDeviceConnected) {
       final l10n = context.l10n;
-      _showMessage(context, l10n.buttonDeviceNotConnectedTitle, l10n.buttonConnectFirstMessage);
+      _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
       return;
     }
 
@@ -186,7 +222,7 @@ class _PairPageState extends State<PairPage> {
   Future<void> _enableBluetoothDiscoverable() async {
     if (!_isDeviceConnected) {
       final l10n = context.l10n;
-      _showMessage(context, l10n.buttonDeviceNotConnectedTitle, l10n.buttonConnectFirstMessage);
+      _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
       return;
     }
 

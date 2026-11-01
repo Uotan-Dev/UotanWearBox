@@ -1,4 +1,5 @@
 import '../miuix_dialog.dart';
+import '../miuix_titled_page.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
@@ -7,6 +8,7 @@ import '../platform_tools.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_miuix/miuix.dart';
 import 'package:watch_assistant/l10n/l10n.dart';
 
 class InstallAppPage extends StatefulWidget {
@@ -23,6 +25,23 @@ class _InstallAppPageState extends State<InstallAppPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      // 窄屏：miuix 标题栏 + miuix 选项行；安装过程中禁止返回
+      return PopScope(
+        canPop: !_isInstalling,
+        child: MiuixTitledPage(
+          title: l10n.installApptoWatch,
+          showBackButton: true,
+          onBackPressed: _isInstalling ? () {} : null,
+          body: Builder(
+            builder: (context) => ListView(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+              children: [_buildNarrowCard(context)],
+            ),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0), // 设置AppBar的高度
@@ -116,13 +135,46 @@ class _InstallAppPageState extends State<InstallAppPage> {
     );
   }
 
+  // 窄屏 miuix 卡片：未安装时为"选择应用安装"选项，安装中显示进度和输出
+  Widget _buildNarrowCard(BuildContext context) {
+    final l10n = context.l10n;
+    final MiuixThemeData theme = MiuixTheme.of(context);
+    final String? output = _installingMessage == l10n.installingWaiting
+        ? null
+        : _installingMessage;
+    return MiuixCard(
+      insideMargin: EdgeInsets.zero,
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(
+          shape: MiuixSquircleBorder(
+            cornerRadius: MiuixCardDefaults.cornerRadius,
+          ),
+        ),
+        child: _isInstalling
+            ? MiuixBasicComponent(
+                title: l10n.installingWaiting,
+                summary: output,
+                endActions: [
+                  MiuixInfiniteProgressIndicator(
+                    color: theme.colors.onBackgroundVariant,
+                  ),
+                ],
+              )
+            : MiuixArrowPreference(
+                title: l10n.selectApptoInstall,
+                onClick: () => _selectAndInstallApk(context),
+              ),
+      ),
+    );
+  }
+
   // 选择APK文件并使用ADB进行安装
   Future<void> _selectAndInstallApk(BuildContext context) async {
     final l10n = context.l10n;
     // 先检查是否有设备连接
     bool hasConnectedDevice = await _checkDeviceConnection();
     if (!hasConnectedDevice) {
-      _showMessage(context, l10n.installNoDeviceTitle, l10n.installNoDeviceMessage);
+      _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
       return; // 如果没有连接设备，直接返回
     }
 

@@ -169,6 +169,114 @@ abstract class AppLocalizations {
   /// **'Visit Website'**
   String get settingsSectionVisit;
 
+  /// No description provided for @settingsSectionAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get settingsSectionAbout;
+
+  /// No description provided for @settingsAboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About Uotan WearBox'**
+  String get settingsAboutTitle;
+
+  /// No description provided for @settingsAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get settingsAppearanceTitle;
+
+  /// No description provided for @settingsAppearanceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language and dark mode'**
+  String get settingsAppearanceSubtitle;
+
+  /// No description provided for @settingsFeaturesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Features'**
+  String get settingsFeaturesTitle;
+
+  /// No description provided for @settingsFeaturesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn optional features on or off'**
+  String get settingsFeaturesSubtitle;
+
+  /// No description provided for @featuresAppCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable App Center'**
+  String get featuresAppCenterTitle;
+
+  /// No description provided for @featuresAppCenterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the Apps page in the navigation bar to browse and install watch apps'**
+  String get featuresAppCenterSubtitle;
+
+  /// No description provided for @aboutLicensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open source licenses'**
+  String get aboutLicensesTitle;
+
+  /// No description provided for @aboutWithdrawConsentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw privacy policy consent'**
+  String get aboutWithdrawConsentTitle;
+
+  /// No description provided for @withdrawConsentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'After withdrawing, the app will exit. You will need to read and accept the User Agreement and Privacy Policy again the next time you open it.'**
+  String get withdrawConsentMessage;
+
+  /// No description provided for @withdrawConsentConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw and exit'**
+  String get withdrawConsentConfirm;
+
+  /// No description provided for @consentDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User Agreement and Privacy Policy'**
+  String get consentDialogTitle;
+
+  /// No description provided for @consentDialogMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Uotan WearBox. Before you start, please read and agree to the following:'**
+  String get consentDialogMessage;
+
+  /// No description provided for @consentDisagree.
+  ///
+  /// In en, this message translates to:
+  /// **'Disagree and exit'**
+  String get consentDisagree;
+
+  /// No description provided for @consentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree'**
+  String get consentAgree;
+
+  /// No description provided for @aboutIcpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'ICP filing number'**
+  String get aboutIcpLabel;
+
+  /// No description provided for @aboutSectionFiling.
+  ///
+  /// In en, this message translates to:
+  /// **'Filing information'**
+  String get aboutSectionFiling;
+
   /// No description provided for @settingsFaqTitle.
   ///
   /// In en, this message translates to:
@@ -1105,18 +1213,6 @@ abstract class AppLocalizations {
   /// **'Installation in progress, please wait...'**
   String get installingWaiting;
 
-  /// No description provided for @installNoDeviceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'No device connected'**
-  String get installNoDeviceTitle;
-
-  /// No description provided for @installNoDeviceMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'No device was detected. Please make sure the device is connected.'**
-  String get installNoDeviceMessage;
-
   /// No description provided for @installSuccessTitle.
   ///
   /// In en, this message translates to:
@@ -1177,29 +1273,23 @@ abstract class AppLocalizations {
   /// **'Notice'**
   String get commonNoticeTitle;
 
+  /// No description provided for @deviceNotConnectedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device not connected'**
+  String get deviceNotConnectedTitle;
+
+  /// No description provided for @deviceNotConnectedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No device detected. Make sure your watch is connected and USB debugging is enabled.'**
+  String get deviceNotConnectedMessage;
+
   /// No description provided for @buttonPageTitle.
   ///
   /// In en, this message translates to:
   /// **'Button simulation'**
   String get buttonPageTitle;
-
-  /// No description provided for @buttonDeviceNotConnectedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Device not connected'**
-  String get buttonDeviceNotConnectedTitle;
-
-  /// No description provided for @buttonDeviceNotConnectedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Please check that the device is connected to the computer and USB debugging is enabled.'**
-  String get buttonDeviceNotConnectedMessage;
-
-  /// No description provided for @buttonConnectFirstMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Please connect the device first.'**
-  String get buttonConnectFirstMessage;
 
   /// No description provided for @buttonSendKeySuccess.
   ///
@@ -1314,12 +1404,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unavailable'**
   String get displayValueUnavailable;
-
-  /// No description provided for @displayDeviceNotConnectedMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'No device detected. Please check the connection.'**
-  String get displayDeviceNotConnectedMessage;
 
   /// No description provided for @displayErrorCheckingConnection.
   ///
@@ -1476,12 +1560,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load installed apps: {error}'**
   String appManageCannotFetch(Object error);
-
-  /// No description provided for @appManageDeviceDisconnected.
-  ///
-  /// In en, this message translates to:
-  /// **'The device appears to be disconnected.'**
-  String get appManageDeviceDisconnected;
 
   /// No description provided for @appManageTooltipUnfreeze.
   ///
@@ -1860,12 +1938,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to import the text file: {error}'**
   String typeImportFailure(Object error);
-
-  /// No description provided for @typeNoDeviceMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'No device detected. Please check the connection.'**
-  String get typeNoDeviceMessage;
 
   /// No description provided for @typeEmptyTextMessage.
   ///

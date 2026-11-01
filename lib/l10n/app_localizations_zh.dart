@@ -47,6 +47,61 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settingsSectionVisit => '访问官网';
 
   @override
+  String get settingsSectionAbout => '关于';
+
+  @override
+  String get settingsAboutTitle => '关于柚坛手表助手';
+
+  @override
+  String get settingsAppearanceTitle => '界面显示';
+
+  @override
+  String get settingsAppearanceSubtitle => '语言设置与深色模式';
+
+  @override
+  String get settingsFeaturesTitle => '功能';
+
+  @override
+  String get settingsFeaturesSubtitle => '开启或关闭可选功能';
+
+  @override
+  String get featuresAppCenterTitle => '启用应用中心';
+
+  @override
+  String get featuresAppCenterSubtitle => '在导航栏中显示“应用”页面，可浏览并安装手表应用';
+
+  @override
+  String get aboutLicensesTitle => '开源许可声明';
+
+  @override
+  String get aboutWithdrawConsentTitle => '撤回隐私政策同意';
+
+  @override
+  String get withdrawConsentMessage =>
+      '撤回同意后应用将退出，下次打开时需要重新阅读并同意用户协议和隐私政策才能继续使用。';
+
+  @override
+  String get withdrawConsentConfirm => '撤回并退出';
+
+  @override
+  String get consentDialogTitle => '用户协议与隐私政策';
+
+  @override
+  String get consentDialogMessage => '欢迎使用柚坛手表助手！开始使用前，请仔细阅读并同意以下协议：';
+
+  @override
+  String get consentDisagree => '不同意并退出';
+
+  @override
+  String get consentAgree => '同意';
+
+  @override
+  String get aboutIcpLabel => 'ICP备案号';
+
+  @override
+  String get aboutSectionFiling => '备案信息';
+
+  @override
   String get settingsFaqTitle => '常见问题';
 
   @override
@@ -565,12 +620,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get installingWaiting => '安装进行中，请稍候...';
 
   @override
-  String get installNoDeviceTitle => '没有连接设备';
-
-  @override
-  String get installNoDeviceMessage => '没有检测到设备，请确保设备已连接。';
-
-  @override
   String get installSuccessTitle => '安装成功';
 
   @override
@@ -605,16 +654,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commonNoticeTitle => '提示';
 
   @override
+  String get deviceNotConnectedTitle => '设备未连接';
+
+  @override
+  String get deviceNotConnectedMessage => '未检测到设备，请确认手表已连接并开启 USB 调试。';
+
+  @override
   String get buttonPageTitle => '按键模拟';
-
-  @override
-  String get buttonDeviceNotConnectedTitle => '设备未连接';
-
-  @override
-  String get buttonDeviceNotConnectedMessage => '请检查设备是否连接到电脑，并开启USB调试模式';
-
-  @override
-  String get buttonConnectFirstMessage => '请先连接设备';
 
   @override
   String buttonSendKeySuccess(Object keycode) {
@@ -676,9 +722,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get displayValueUnavailable => '无法获取';
-
-  @override
-  String get displayDeviceNotConnectedMessage => '未检测到设备，请检查设备连接';
 
   @override
   String displayErrorCheckingConnection(Object error) {
@@ -781,9 +824,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String appManageCannotFetch(Object error) {
     return '无法获取已安装的应用列表: $error';
   }
-
-  @override
-  String get appManageDeviceDisconnected => '检测到设备已断开连接。';
 
   @override
   String get appManageTooltipUnfreeze => '解冻';
@@ -1025,9 +1065,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String typeImportFailure(Object error) {
     return '无法导入文本文件: $error';
   }
-
-  @override
-  String get typeNoDeviceMessage => '未检测到设备，请检查设备连接';
 
   @override
   String get typeEmptyTextMessage => '请输入文本';

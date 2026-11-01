@@ -46,7 +46,7 @@ class Page2 extends StatelessWidget {
           [
             _FeatureAction.sendText,
             _FeatureAction.displaySettings,
-          _FeatureAction.keySimulation,
+            _FeatureAction.keySimulation,
             _FeatureAction.rotateScreen,
             _FeatureAction.capture,
           ]
@@ -72,7 +72,8 @@ class Page2 extends StatelessWidget {
       return MiuixTitledPage(
         title: l10n.featuresTitle,
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          padding: EdgeInsets.fromLTRB(
+              12, 0, 12, 20 + MediaQuery.paddingOf(context).bottom),
           children: [
             for (final (index, section) in sections.indexed) ...[
               if (index > 0) const SizedBox(height: 10),

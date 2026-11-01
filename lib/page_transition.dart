@@ -1,3 +1,4 @@
+import 'platform_support.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -55,6 +56,11 @@ class AppPageTransitionsBuilder extends PageTransitionsBuilder {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
+    // 移动端：页面顶部避开状态栏；底部不避让，内容延伸到手势导航条下方（沉浸），
+    // 需要时由页面通过 MediaQuery 底部内边距自行留白
+    if (!isDesktop) {
+      child = SafeArea(bottom: false, child: child);
+    }
     if (MediaQuery.sizeOf(context).width < kNarrowLayoutBreakpoint) {
       return _cupertino.buildTransitions<T>(
           route, context, animation, secondaryAnimation, child);

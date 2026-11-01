@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -63,7 +65,9 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
     final l10n = context.l10n;
     return PopScope(
       canPop: !_busy,
-      child: Scaffold(
+      child: isNarrowLayout(context)
+          ? _buildNarrow(context)
+          : Scaffold(
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(90.0),
           child: Padding(
@@ -127,6 +131,154 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
       ),
     );
   }
+
+  // ---------- 窄屏：miuix 样式 ----------
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    final int level = (int.tryParse(_batteryLevel) ?? 0).clamp(0, 100);
+    return MiuixTitledPage(
+      title: l10n.featureBatteryManager,
+      showBackButton: true,
+      // 操作进行中禁止返回（与宽屏一致）
+      onBackPressed: _busy ? () {} : null,
+      body: Builder(
+        builder: (context) {
+          if (_loading) {
+            // 内容不足一屏也包在滚动视图中，标题栏可随回弹折叠
+            return LayoutBuilder(
+              builder: (context, constraints) => SingleChildScrollView(
+                child: SizedBox(
+                  height: constraints.maxHeight,
+                  child: const Center(child: MiuixInfiniteProgressIndicator()),
+                ),
+              ),
+            );
+          }
+          final MiuixThemeData theme = MiuixTheme.of(context);
+          Widget modeRow(String title, bool active, VoidCallback onClick) {
+            return MiuixBasicComponent(
+              title: title,
+              enabled: !_busy,
+              onClick: onClick,
+              endActions: <Widget>[
+                if (active)
+                  Icon(Icons.check, size: 22, color: theme.colors.primary),
+              ],
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+            children: <Widget>[
+              MiuixSectionTitle(l10n.deviceBatteryStatusTitle, top: 0),
+              MiuixGroupCard(
+                children: <Widget>[
+                  MiuixValueRow(
+                    title: l10n.batteryCurrentLevel,
+                    value: '$level%',
+                    bottom: Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: MiuixLinearProgressIndicator(progress: level / 100),
+                    ),
+                  ),
+                  MiuixValueRow.fromLabel(l10n.deviceBatteryHealth(
+                      localizeBatteryHealth(l10n, _batteryHealth))),
+                  MiuixValueRow.fromLabel(
+                      l10n.deviceBatteryVoltage(_batteryVoltage)),
+                  MiuixValueRow.fromLabel(
+                      l10n.deviceBatteryTemperature(_batteryTemperature)),
+                ],
+              ),
+              MiuixSectionTitle(l10n.featureBatteryManager),
+              MiuixGroupCard(
+                children: <Widget>[
+                  MiuixArrowPreference(
+                    title: l10n.batteryTemperatureLabel,
+                    summary: _temperatureController.text.trim().isEmpty
+                        ? null
+                        : _temperatureController.text.trim(),
+                    enabled: !_busy,
+                    onClick: () => _askValue(
+                      l10n.batteryTemperatureLabel,
+                      _temperatureController,
+                      _setTemperature,
+                    ),
+                  ),
+                  MiuixArrowPreference(
+                    title: l10n.batteryLevelLabel,
+                    summary: _levelController.text.trim().isEmpty
+                        ? null
+                        : _levelController.text.trim(),
+                    enabled: !_busy,
+                    onClick: () => _askValue(
+                      l10n.batteryLevelLabel,
+                      _levelController,
+                      _setBatteryLevel,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              MiuixGroupCard(
+                children: <Widget>[
+                  modeRow(l10n.batterySimulateDischarging,
+                      _simulateNotCharging, _setNotCharging),
+                  modeRow(l10n.batterySimulateWireless,
+                      _simulateWirelessCharging, _setWirelessCharging),
+                  modeRow(l10n.batterySimulateUsb, _simulateUsbCharging,
+                      _setUsbCharging),
+                  MiuixArrowPreference(
+                    title: l10n.batteryRestoreDefault,
+                    enabled: !_busy,
+                    onClick: () => _resetBattery(showMessage: true),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  // 窄屏：miuix 弹窗输入数值，确认后执行修改
+  Future<void> _askValue(
+    String title,
+    TextEditingController controller,
+    Future<void> Function() apply,
+  ) async {
+    final bool? confirmed = await showMiuixDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) => MiuixAlertDialog(
+        title: Text(title),
+        content: MiuixTextField(
+          controller: controller,
+          label: title,
+          useLabelAsPlaceholder: true,
+          singleLine: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          onSubmitted: (_) => Navigator.of(dialogContext).pop(true),
+        ),
+        actions: <Widget>[
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.dialogCancel),
+          ),
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.batteryModify),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      setState(() {});
+      await apply();
+    }
+  }
+
+  // ---------- 宽屏 ----------
 
   Widget _buildUsageCard() {
     final int level = int.tryParse(_batteryLevel) ?? 0;
@@ -699,7 +851,10 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
         return false;
       }
       if (!connected && showDialog) {
-        _showErrorDialog(context.l10n.buttonDeviceNotConnectedMessage);
+        _showErrorDialog(
+          context.l10n.deviceNotConnectedMessage,
+          title: context.l10n.deviceNotConnectedTitle,
+        );
       }
       return connected;
     } on TimeoutException {
@@ -721,13 +876,13 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
     }
   }
 
-  void _showErrorDialog(String message) {
+  void _showErrorDialog(String message, {String? title}) {
     showMiuixDialog<void>(
       context: context,
       builder: (BuildContext context) {
         return MiuixAlertDialog(
           backgroundColor: context.palette.surface,
-          title: Text(context.l10n.commonErrorTitle),
+          title: Text(title ?? context.l10n.commonErrorTitle),
           content: Text(message),
           actions: <Widget>[
             MiuixDialogButton(

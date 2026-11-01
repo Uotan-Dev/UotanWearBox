@@ -1,3 +1,5 @@
+import '../miuix_titled_page.dart';
+import 'package:flutter_miuix/miuix.dart';
 import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
@@ -38,7 +40,7 @@ class _RotatePageState extends State<RotatePage> {
         });
         if (!connected) {
           final l10n = context.l10n;
-          _showMessage(context, l10n.buttonDeviceNotConnectedTitle, l10n.buttonDeviceNotConnectedMessage);
+          _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
         }
       });
     }
@@ -47,6 +49,28 @@ class _RotatePageState extends State<RotatePage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      // 窄屏：两列 miuix 按钮（与按键模拟一致）
+      return MiuixTitledPage(
+        title: l10n.rotatePageTitle,
+        showBackButton: true,
+        body: GridView.count(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 20),
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 3,
+          children: [
+            for (final Map<String, String> button in _rotations())
+              MiuixButton(
+                onPressed: () =>
+                    _rotateScreen(button['rotation']!, button['name']!),
+                child: Text(button['name']!),
+              ),
+          ],
+        ),
+      );
+    }
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(90.0),
@@ -98,14 +122,19 @@ class _RotatePageState extends State<RotatePage> {
     );
   }
 
-  List<Widget> _buildButtons() {
+  // 旋转方向与对应的 user_rotation 值（宽屏卡片与窄屏 miuix 按钮共用）
+  List<Map<String, String>> _rotations() {
     final l10n = context.l10n;
-    final List<Map<String, String>> buttonData = [
+    return [
       {"name": l10n.rotateButtonLeft, "rotation": "1"},
       {"name": l10n.rotateButtonRight, "rotation": "3"},
       {"name": l10n.rotateButtonFlip, "rotation": "2"},
       {"name": l10n.rotateButtonReset, "rotation": "0"},
     ];
+  }
+
+  List<Widget> _buildButtons() {
+    final List<Map<String, String>> buttonData = _rotations();
 
     return buttonData.map((button) {
       return _buildButton(button["name"]!, () => _rotateScreen(button["rotation"]!, button["name"]!));
@@ -142,7 +171,7 @@ class _RotatePageState extends State<RotatePage> {
   Future<void> _rotateScreen(String rotation, String directionLabel) async {
     if (!_isDeviceConnected) {
       final l10n = context.l10n;
-      _showMessage(context, l10n.buttonDeviceNotConnectedTitle, l10n.buttonConnectFirstMessage);
+      _showMessage(context, l10n.deviceNotConnectedTitle, l10n.deviceNotConnectedMessage);
       return;
     }
 

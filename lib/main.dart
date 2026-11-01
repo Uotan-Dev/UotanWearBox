@@ -6,6 +6,7 @@ import 'package:flutter_miuix/miuix.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+import 'app_prefs.dart';
 import 'home_screen.dart';
 import 'app_snackbar.dart';
 import 'app_theme.dart';
@@ -26,6 +27,8 @@ void main() async {
   if (isDesktop) {
     await _initDesktopWindow();
   }
+
+  await loadAppPrefs();
 
   runApp(const MyApp());
 }
@@ -234,8 +237,8 @@ class _MiuixRoot extends StatelessWidget {
   }
 }
 
-/// 移动端外框：状态栏、手势导航条透明，其下方用页面背景色铺满（沉浸），
-/// 内容通过 SafeArea 避开系统栏；状态栏图标颜色跟随深浅色主题
+/// 移动端外框：状态栏、手势导航条透明，其下方用页面背景色铺满（沉浸）；
+/// 状态栏图标颜色跟随深浅色主题
 class _MobileFrame extends StatelessWidget {
   const _MobileFrame({required this.child});
 
@@ -253,9 +256,11 @@ class _MobileFrame extends StatelessWidget {
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarContrastEnforced: false,
       ),
+      // 不在此处统一 SafeArea：页面在路由转场中自行避开状态栏（见 AppPageTransitionsBuilder），
+      // 弹窗等非页面路由与弹出层可铺满全屏，遮罩覆盖状态栏和手势导航条
       child: ColoredBox(
         color: palette.background,
-        child: SafeArea(child: child),
+        child: child,
       ),
     );
   }
