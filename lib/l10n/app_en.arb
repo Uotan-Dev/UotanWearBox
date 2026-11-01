@@ -459,6 +459,7 @@
   "appManageTooltipFreeze": "Freeze",
   "appManageTooltipExportApk": "Export APK",
   "appManageTooltipUninstall": "Uninstall",
+  "appManageFrozenLabel": "Frozen",
   "appManageConfirmUninstallTitle": "Uninstall app",
   "appManageConfirmUninstallMessage": "Are you sure you want to uninstall {packageName}?",
   "@appManageConfirmUninstallMessage": {

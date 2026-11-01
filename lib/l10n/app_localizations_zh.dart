@@ -838,6 +838,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appManageTooltipUninstall => '卸载';
 
   @override
+  String get appManageFrozenLabel => '已冻结';
+
+  @override
   String get appManageConfirmUninstallTitle => '确认卸载';
 
   @override

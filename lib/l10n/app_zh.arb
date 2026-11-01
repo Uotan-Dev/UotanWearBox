@@ -459,6 +459,7 @@
   "appManageTooltipFreeze": "冻结",
   "appManageTooltipExportApk": "导出APK",
   "appManageTooltipUninstall": "卸载",
+  "appManageFrozenLabel": "已冻结",
   "appManageConfirmUninstallTitle": "确认卸载",
   "appManageConfirmUninstallMessage": "确定要卸载 {packageName} 吗？",
   "@appManageConfirmUninstallMessage": {

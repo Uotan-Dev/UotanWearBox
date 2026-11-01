@@ -459,6 +459,7 @@
   "appManageTooltipFreeze": "凍結",
   "appManageTooltipExportApk": "APK を抽出",
   "appManageTooltipUninstall": "アンインストール",
+  "appManageFrozenLabel": "凍結中",
   "appManageConfirmUninstallTitle": "アンインストール確認",
   "appManageConfirmUninstallMessage": "{packageName} をアンインストールしますか？",
   "@appManageConfirmUninstallMessage": {

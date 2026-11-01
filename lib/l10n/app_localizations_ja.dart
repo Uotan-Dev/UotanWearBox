@@ -841,6 +841,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get appManageTooltipUninstall => 'アンインストール';
 
   @override
+  String get appManageFrozenLabel => '凍結中';
+
+  @override
   String get appManageConfirmUninstallTitle => 'アンインストール確認';
 
   @override

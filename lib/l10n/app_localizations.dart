@@ -1585,6 +1585,12 @@ abstract class AppLocalizations {
   /// **'Uninstall'**
   String get appManageTooltipUninstall;
 
+  /// No description provided for @appManageFrozenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen'**
+  String get appManageFrozenLabel;
+
   /// No description provided for @appManageConfirmUninstallTitle.
   ///
   /// In en, this message translates to:

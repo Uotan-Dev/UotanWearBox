@@ -3,10 +3,12 @@ import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
 import '../platform_tools.dart';
+import '../miuix_titled_page.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_miuix/miuix.dart';
 import 'package:watch_assistant/l10n/l10n.dart';
 
 class AppManagementPage extends StatefulWidget {
@@ -22,6 +24,12 @@ class _AppManagementPageState extends State<AppManagementPage> {
   bool isLoading = true; // 用于控制加载状态
   double progress = 0.0; // 用于控制加载进度
   bool _initialized = false;
+
+  // 窄屏：点击应用弹出的操作菜单
+  MiuixDropdownEntry? _actionMenu;
+  Rect _actionMenuAnchor = Rect.zero;
+  bool _actionMenuVisible = false;
+  Offset _lastTapPosition = Offset.zero;
 
   @override
   void initState() {
@@ -191,9 +199,126 @@ class _AppManagementPageState extends State<AppManagementPage> {
     );
   }
 
+  // 执行应用操作前确认设备仍然连接
+  Future<void> _runIfConnected(VoidCallback action) async {
+    if (!await _isDeviceConnected()) {
+      _shownoconnectDialog(context.l10n.deviceNotConnectedMessage);
+      return;
+    }
+    action();
+  }
+
+  // 窄屏：在点击位置弹出冻结 / 导出 / 卸载菜单
+  void _showActionMenu(Map<String, dynamic> app) {
+    final l10n = context.l10n;
+    final String name = app['name'];
+    setState(() {
+      _actionMenu = MiuixDropdownEntry(
+        items: [
+          MiuixDropdownItem(
+            text: app['isFrozen']
+                ? l10n.appManageTooltipUnfreeze
+                : l10n.appManageTooltipFreeze,
+            onClick: () => _runIfConnected(() => app['isFrozen']
+                ? _unfreezeApp(name)
+                : _freezeApp(name)),
+          ),
+          MiuixDropdownItem(
+            text: l10n.appManageTooltipExportApk,
+            onClick: () => _runIfConnected(() => _extractApk(name)),
+          ),
+          if (!app['isSystemApp'])
+            MiuixDropdownItem(
+              text: l10n.appManageTooltipUninstall,
+              onClick: () =>
+                  _runIfConnected(() => _showConfirmUninstallDialog(name)),
+            ),
+        ],
+      );
+      _actionMenuAnchor = Rect.fromLTWH(
+          _lastTapPosition.dx, _lastTapPosition.dy, 1, 1);
+      _actionMenuVisible = true;
+    });
+  }
+
+  Widget _buildNarrow(BuildContext context) {
+    final l10n = context.l10n;
+    return MiuixTitledPage(
+      title: l10n.appManageTitle,
+      showBackButton: true,
+      onBackPressed: isLoading ? () {} : null,
+      body: Stack(
+        children: [
+          if (isLoading)
+            const Center(child: MiuixInfiniteProgressIndicator())
+          else
+            ListView.separated(
+              padding: EdgeInsets.fromLTRB(
+                  12, 0, 12, 20 + MediaQuery.paddingOf(context).bottom),
+              itemCount: installedApps.length + 1,
+              separatorBuilder: (_, index) =>
+                  SizedBox(height: index == 0 ? 16 : 10),
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return MiuixGroupCard(
+                    children: [
+                      MiuixSwitchPreference(
+                        title: l10n.appManageShowSystemApps,
+                        value: showSystemApps,
+                        onChanged: (value) {
+                          setState(() {
+                            showSystemApps = value;
+                          });
+                          _fetchInstalledApps(); // 切换显示模式时重新获取应用列表
+                        },
+                      ),
+                    ],
+                  );
+                }
+                final Map<String, dynamic> app = installedApps[index - 1];
+                return Listener(
+                  // 记录点击位置，菜单在此处弹出
+                  onPointerDown: (event) => _lastTapPosition = event.position,
+                  child: MiuixGroupCard(
+                    children: [
+                      MiuixArrowPreference(
+                        title: app['name'],
+                        summary:
+                            app['isFrozen'] ? l10n.appManageFrozenLabel : null,
+                        onClick: () => _showActionMenu(app),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          if (_actionMenu != null)
+            MiuixOverlayDropdownPopup(
+              entry: _actionMenu!,
+              show: _actionMenuVisible,
+              anchorBounds: _actionMenuAnchor,
+              dropdownColors: MiuixDropdownDefaults.dropdownColors(context),
+              onDismiss: () => setState(() => _actionMenuVisible = false),
+              onDismissFinished: () {
+                if (mounted && !_actionMenuVisible) {
+                  setState(() => _actionMenu = null);
+                }
+              },
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    if (isNarrowLayout(context)) {
+      return WillPopScope(
+        onWillPop: () async => !isLoading, // 正在加载时禁用返回
+        child: _buildNarrow(context),
+      );
+    }
     return WillPopScope(
       onWillPop: () async {
         return !isLoading; // 如果正在加载，则禁用返回键
