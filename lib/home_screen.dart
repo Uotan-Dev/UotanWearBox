@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
     super.dispose();
   }
 
-  final List<Widget> _pages = [];
+  List<Widget> _pages = [];
 
   // 短暂显示启动页后进入主界面
   Future<void> _finishStartup() async {
@@ -401,27 +401,27 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
-    _pages
-      ..clear()
-      ..addAll([
-        for (final String tab in _tabs)
-          switch (tab) {
-            'home' => Page1(
-                devices: _devices,
-                onRefreshDevices: _refreshDevicesNow,
-              ),
-            'features' => const Page2(),
-            'store' => const StorePage(),
-            _ => Page3(
-                onLocaleChanged: widget.onLocaleChanged,
-                currentLocale: widget.locale,
-                onThemeModeChanged: widget.onThemeModeChanged,
-                themeMode: widget.themeMode,
-                currentVersion: '$currentVersion',
-                onCheckUpdate: _checkForUpdates,
-              ),
-          },
-      ]);
+    // 每次构建都生成新的列表：PageView 按列表实例判断子页面是否需要重建，
+    // 原地修改同一个列表会导致设备连接等状态变化不刷新，直到切换页面
+    _pages = [
+      for (final String tab in _tabs)
+        switch (tab) {
+          'home' => Page1(
+              devices: _devices,
+              onRefreshDevices: _refreshDevicesNow,
+            ),
+          'features' => const Page2(),
+          'store' => const StorePage(),
+          _ => Page3(
+              onLocaleChanged: widget.onLocaleChanged,
+              currentLocale: widget.locale,
+              onThemeModeChanged: widget.onThemeModeChanged,
+              themeMode: widget.themeMode,
+              currentVersion: '$currentVersion',
+              onCheckUpdate: _checkForUpdates,
+            ),
+        },
+    ];
 
     return Scaffold(
       body: AnimatedSwitcher(
