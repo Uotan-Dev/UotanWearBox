@@ -77,8 +77,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutWithdrawConsentTitle => '撤回隐私政策同意';
 
   @override
-  String get withdrawConsentMessage =>
-      '撤回同意后应用将退出，下次打开时需要重新阅读并同意用户协议和隐私政策才能继续使用。';
+  String get withdrawConsentMessage => '撤回同意后应用将退出，下次打开时需要重新阅读并同意用户协议和隐私政策才能继续使用。';
 
   @override
   String get withdrawConsentConfirm => '撤回并退出';
@@ -1958,4 +1957,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String flashLogFailed(String action, String code) {
     return '失败：$action（退出码 $code）';
   }
+
+  @override
+  String get iosFilesAppFolder => '本机（「文件」App）';
+
+  @override
+  String get iosFilesAppLocation => '文件 › 我的 iPhone › 柚坛手表助手';
+
+  @override
+  String iosSavedToFilesApp(String name) {
+    return '已保存到「文件」App › 我的 iPhone › 柚坛手表助手:\n$name';
+  }
+
+  @override
+  String get wirelessIosHint => 'iOS 通过网络 ADB 连接手表：请在手表开发者选项中开启「ADB 调试（网络）」，或先用电脑执行 adb tcpip 5555，然后填写手表的 IP 地址和端口（默认 5555）。手机与手表需连接同一 Wi‑Fi，首次连接需在手表上点击「允许」。暂不支持 Android 11+「无线调试」的配对码方式。';
+
+  @override
+  String get wirelessConnecting => '正在连接…首次连接请在手表上允许调试';
 }

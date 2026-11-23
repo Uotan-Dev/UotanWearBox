@@ -68,8 +68,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get featuresAppCenterTitle => 'Enable App Center';
 
   @override
-  String get featuresAppCenterSubtitle =>
-      'Show the Apps page in the navigation bar to browse and install watch apps';
+  String get featuresAppCenterSubtitle => 'Show the Apps page in the navigation bar to browse and install watch apps';
 
   @override
   String get aboutLicensesTitle => 'Open source licenses';
@@ -78,8 +77,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutWithdrawConsentTitle => 'Withdraw privacy policy consent';
 
   @override
-  String get withdrawConsentMessage =>
-      'After withdrawing, the app will exit. You will need to read and accept the User Agreement and Privacy Policy again the next time you open it.';
+  String get withdrawConsentMessage => 'After withdrawing, the app will exit. You will need to read and accept the User Agreement and Privacy Policy again the next time you open it.';
 
   @override
   String get withdrawConsentConfirm => 'Withdraw and exit';
@@ -88,8 +86,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get consentDialogTitle => 'User Agreement and Privacy Policy';
 
   @override
-  String get consentDialogMessage =>
-      'Welcome to Uotan WearBox. Before you start, please read and agree to the following:';
+  String get consentDialogMessage => 'Welcome to Uotan WearBox. Before you start, please read and agree to the following:';
 
   @override
   String get consentDisagree => 'Disagree and exit';
@@ -659,8 +656,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceNotConnectedTitle => 'Device not connected';
 
   @override
-  String get deviceNotConnectedMessage =>
-      'No device detected. Make sure your watch is connected and USB debugging is enabled.';
+  String get deviceNotConnectedMessage => 'No device detected. Make sure your watch is connected and USB debugging is enabled.';
 
   @override
   String get buttonPageTitle => 'Button simulation';
@@ -1961,4 +1957,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String flashLogFailed(String action, String code) {
     return 'Failed: $action (exit code $code)';
   }
+
+  @override
+  String get iosFilesAppFolder => 'This iPhone (Files app)';
+
+  @override
+  String get iosFilesAppLocation => 'Files › On My iPhone › 柚坛手表助手';
+
+  @override
+  String iosSavedToFilesApp(String name) {
+    return 'Saved to Files › On My iPhone › 柚坛手表助手:\n$name';
+  }
+
+  @override
+  String get wirelessIosHint => 'On iOS the watch is connected via network ADB: enable \"ADB debugging (network)\" in the watch\'s developer options, or run adb tcpip 5555 from a computer first, then enter the watch\'s IP address and port (default 5555). The phone and watch must be on the same Wi‑Fi; tap \"Allow\" on the watch the first time. Pairing-code \"Wireless debugging\" (Android 11+) is not supported yet.';
+
+  @override
+  String get wirelessConnecting => 'Connecting… allow debugging on the watch if prompted';
 }

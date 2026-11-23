@@ -935,5 +935,10 @@
   "flashActionSlot": "スロットを切り替え {current} → {target}",
   "flashLogStart": "開始: {action}",
   "flashLogDone": "完了: {action}",
-  "flashLogFailed": "失敗: {action}（終了コード {code}）"
+  "flashLogFailed": "失敗: {action}（終了コード {code}）",
+  "iosFilesAppFolder": "この iPhone（ファイル App）",
+  "iosFilesAppLocation": "ファイル › この iPhone 内 › 柚坛手表助手",
+  "iosSavedToFilesApp": "ファイル App › この iPhone 内 › 柚坛手表助手 に保存しました:\n{name}",
+  "wirelessIosHint": "iOS ではネットワーク ADB でウォッチに接続します。ウォッチの開発者向けオプションで「ADB デバッグ（ネットワーク）」を有効にするか、先に PC で adb tcpip 5555 を実行してから、ウォッチの IP アドレスとポート（既定 5555）を入力してください。iPhone とウォッチは同じ Wi‑Fi に接続し、初回はウォッチで「許可」をタップしてください。Android 11 以降のペア設定コード方式の「ワイヤレス デバッグ」には未対応です。",
+  "wirelessConnecting": "接続中… 初回はウォッチでデバッグを許可してください"
 }

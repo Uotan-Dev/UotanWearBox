@@ -4,6 +4,7 @@ import '../platform_support.dart';
 import '../app_theme.dart';
 import 'package:watch_assistant/l10n/l10n.dart';
 import 'dart:convert';
+import '../adb_runner.dart';
 import '../platform_tools.dart';
 import 'dart:io';
 
@@ -691,9 +692,7 @@ class _FlashToolPageState extends State<FlashToolPage> {
     }
 
     try {
-      final ProcessResult result = await Process.run(
-          fastbootPath, <String>['getvar', 'current-slot'],
-          environment: toolEnvironment);
+      final ProcessResult result = await runFastboot(<String>['getvar', 'current-slot']);
       final String mergedOutput =
           '${result.stdout}\n${result.stderr}'.toLowerCase();
       final RegExpMatch? match =
@@ -763,9 +762,7 @@ class _FlashToolPageState extends State<FlashToolPage> {
 
   Future<bool> _ensureFastbootDeviceReady() async {
     try {
-      final ProcessResult result = await Process.run(
-          fastbootPath, <String>['devices'],
-          environment: toolEnvironment);
+      final ProcessResult result = await runFastboot(<String>['devices']);
       final String output = result.stdout.toString();
       final List<String> lines = output
           .split('\n')

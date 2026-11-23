@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -200,14 +200,14 @@ class _PairPageState extends State<PairPage> {
 
     try {
       // 清除 Google Play 服务
-      ProcessResult clearResult = await Process.run(adbPath, ['shell', 'pm', 'clear', 'com.google.android.gms'], environment: toolEnvironment);
+      ProcessResult clearResult = await runAdb(['shell', 'pm', 'clear', 'com.google.android.gms']);
       if (clearResult.exitCode != 0) {
         _showMessage(context, context.l10n.commonErrorTitle, context.l10n.pairingClearFailure(clearResult.stderr.toString()));
         return;
       }
 
       // 重启设备
-      ProcessResult rebootResult = await Process.run(adbPath, ['shell', 'reboot'], environment: toolEnvironment);
+      ProcessResult rebootResult = await runAdb(['shell', 'reboot']);
       if (rebootResult.exitCode == 0) {
         _showMessage(context, context.l10n.fileManagerSuccessTitle, context.l10n.pairingRebooting);
       } else {
@@ -227,13 +227,13 @@ class _PairPageState extends State<PairPage> {
     }
 
     try {
-      ProcessResult result = await Process.run(adbPath, [
+      ProcessResult result = await runAdb([
         'shell',
         'am',
         'start',
         '-a',
         'android.bluetooth.adapter.action.REQUEST_DISCOVERABLE'
-      ], environment: toolEnvironment);
+      ]);
       if (result.exitCode == 0) {
         _showMessage(context, context.l10n.fileManagerSuccessTitle, context.l10n.pairingBluetoothEnabled);
       } else {
@@ -247,7 +247,7 @@ class _PairPageState extends State<PairPage> {
   /// **检查 ADB 设备连接**
   Future<bool> _checkDeviceConnection() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['devices'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['devices']);
       String output = result.stdout.toString();
       List<String> lines = output.split('\n');
       for (var line in lines.skip(1)) {

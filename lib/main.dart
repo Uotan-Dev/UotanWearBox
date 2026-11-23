@@ -6,6 +6,7 @@ import 'package:flutter_miuix/miuix.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
+import 'adb_runner.dart';
 import 'app_prefs.dart';
 import 'home_screen.dart';
 import 'app_snackbar.dart';
@@ -20,6 +21,7 @@ import 'window_buttons.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initPlatformTools();
+  await initAdbRunner();
   if (Platform.isAndroid) {
     // 内容绘制到状态栏和手势导航条下方，由 _MobileFrame 着色以实现沉浸
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);

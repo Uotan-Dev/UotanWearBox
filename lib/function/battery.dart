@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:async';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -746,18 +746,14 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
     setState(() => _busy = true);
     try {
       for (final MapEntry<String, String> entry in values) {
-        final ProcessResult result = await Process.run(
-          adbPath,
-          <String>[
+        final ProcessResult result = await runAdb(<String>[
             'shell',
             'dumpsys',
             'battery',
             'set',
             entry.key,
             entry.value
-          ],
-          environment: toolEnvironment,
-        ).timeout(_adbTimeout);
+          ]).timeout(_adbTimeout);
         if (result.exitCode != 0) {
           final String stderr = result.stderr.trim();
           _showErrorDialog(stderr.isEmpty
@@ -804,7 +800,7 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
 
     try {
       final ProcessResult result =
-          await Process.run(adbPath, args, environment: toolEnvironment).timeout(_adbTimeout);
+          await runAdb(args).timeout(_adbTimeout);
       final String stderr = result.stderr.trim();
 
       if (result.exitCode != 0 && showDialogOnError) {
@@ -837,7 +833,7 @@ class _BatteryManagerPageState extends State<BatteryManagerPage> {
   Future<bool> _ensureDeviceConnected({bool showDialog = true}) async {
     try {
       final ProcessResult result =
-          await Process.run(adbPath, <String>['devices'], environment: toolEnvironment).timeout(_adbTimeout);
+          await runAdb(<String>['devices']).timeout(_adbTimeout);
       final List<String> lines = result.stdout
           .toString()
           .split('\n')

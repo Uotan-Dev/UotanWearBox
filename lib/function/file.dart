@@ -2,8 +2,7 @@ import '../miuix_dialog.dart';
 import '../miuix_titled_page.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
-import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 import '../blur_menu.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -52,9 +51,7 @@ class _AdbFileManagerPageState extends State<AdbFileManagerPage> {
     });
 
     try {
-      final result = await Process.run(
-          adbPath, ['shell', 'ls', '-p', currentPath],
-          environment: toolEnvironment);
+      final result = await runAdb(['shell', 'ls', '-p', currentPath]);
       if (result.exitCode == 0) {
         await Future.delayed(const Duration(milliseconds: 500)); // 延迟显示加载
         if (!mounted) return;
@@ -190,9 +187,7 @@ class _AdbFileManagerPageState extends State<AdbFileManagerPage> {
     final l10n = context.l10n;
     await _showProgressDialog(l10n.fileManagerDeleteProgress(entry));
     try {
-      final result = await Process.run(
-          adbPath, ['shell', 'rm', '-rf', '$currentPath$entry'],
-          environment: toolEnvironment);
+      final result = await runAdb(['shell', 'rm', '-rf', '$currentPath$entry']);
       _closeProgressDialog();
       if (result.exitCode == 0) {
         _listFiles(); // 重新列出文件和文件夹
@@ -239,15 +234,12 @@ class _AdbFileManagerPageState extends State<AdbFileManagerPage> {
                 String newName = controller.text.trim();
                 if (newName.isNotEmpty && newName != oldName) {
                   await _showProgressDialog(l10n.fileManagerRenameAction);
-                  await Process.run(
-                      adbPath,
-                      [
+                  await runAdb([
                         'shell',
                         'mv',
                         '$currentPath$oldName',
                         '$currentPath$newName'
-                      ],
-                      environment: toolEnvironment);
+                      ]);
                   _closeProgressDialog();
                   _listFiles(); // 更新列表
                 }
@@ -264,21 +256,24 @@ class _AdbFileManagerPageState extends State<AdbFileManagerPage> {
   // 复制文件到电脑
   Future<void> _copyFileToComputer(String fileName) async {
     final l10n = context.l10n;
-    String? savePath = await FilePicker.platform.saveFile(
-      dialogTitle: l10n.fileManagerSaveDialogTitle,
-      fileName: fileName,
-    );
+    // iOS 的保存面板要求先提供文件内容，这里直接保存到「文件」App 可见的文稿目录
+    String? savePath = exportsToFilesApp
+        ? uniqueFilePath(defaultExportDirectory(), fileName)
+        : await FilePicker.platform.saveFile(
+            dialogTitle: l10n.fileManagerSaveDialogTitle,
+            fileName: fileName,
+          );
 
     if (savePath == null) return; // 如果用户取消保存操作，直接返回
 
     await _showProgressDialog(l10n.fileManagerSaveProgress(fileName));
     try {
-      final result = await Process.run(
-          adbPath, ['pull', '$currentPath$fileName', savePath],
-          environment: toolEnvironment);
+      final result = await runAdb(['pull', '$currentPath$fileName', savePath]);
       _closeProgressDialog();
       if (result.exitCode == 0) {
-        _showSuccess(l10n.fileManagerSaveSuccess(savePath));
+        _showSuccess(exportsToFilesApp
+            ? l10n.iosSavedToFilesApp(savePath.split('/').last)
+            : l10n.fileManagerSaveSuccess(savePath));
       } else {
         _showError(l10n.fileManagerSaveFailure);
       }
@@ -296,9 +291,7 @@ class _AdbFileManagerPageState extends State<AdbFileManagerPage> {
       String filePath = result.files.single.path!;
       await _showProgressDialog(context.l10n.fileManagerUploadProgress);
       try {
-        final uploadResult = await Process.run(
-            adbPath, ['push', filePath, currentPath],
-            environment: toolEnvironment);
+        final uploadResult = await runAdb(['push', filePath, currentPath]);
         _closeProgressDialog();
         if (uploadResult.exitCode == 0) {
           _showSuccess(context.l10n.fileManagerUploadSuccess(currentPath));

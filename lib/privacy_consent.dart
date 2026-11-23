@@ -41,6 +41,11 @@ Future<void> ensurePrivacyConsent(BuildContext context) async {
   );
   if (agreed == true) {
     await setPrivacyConsent(true);
+  } else if (!canExitApp) {
+    // iOS 不允许应用自行退出：未同意前重新弹出，不进入应用
+    if (context.mounted) {
+      await ensurePrivacyConsent(context);
+    }
   } else {
     await closeApp();
   }
@@ -70,6 +75,13 @@ Future<void> withdrawPrivacyConsent(BuildContext context) async {
   );
   if (confirmed == true) {
     await setPrivacyConsent(false);
+    if (!canExitApp) {
+      // iOS 无法退出应用，直接重新请求同意
+      if (context.mounted) {
+        await ensurePrivacyConsent(context);
+      }
+      return;
+    }
     await closeApp();
   }
 }

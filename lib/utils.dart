@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'platform_tools.dart';
+import 'adb_runner.dart';
 import 'dart:io';
 
 import 'adb_device_info.dart';
 
 Future<List<AdbDeviceInfo>> fetchAdbDevices() async {
-  final ProcessResult result = await Process.run(adbPath, <String>['devices'], environment: toolEnvironment);
+  final ProcessResult result = await runAdb(<String>['devices']);
   final String output = result.stdout.toString();
   if (!output.contains('device')) {
     return <AdbDeviceInfo>[];
@@ -108,11 +108,7 @@ void checkAdbDevicesPeriodically({
 
 Future<String> getAdbDeviceProperty(String deviceId, String property) async {
   try {
-    final ProcessResult result = await Process.run(
-      adbPath,
-      <String>['-s', deviceId, 'shell', 'getprop', property],
-      environment: toolEnvironment,
-    );
+    final ProcessResult result = await runAdb(<String>['-s', deviceId, 'shell', 'getprop', property]);
     return result.stdout.toString().trim();
   } catch (e) {
     print('Failed to get device property: $e');
@@ -122,11 +118,7 @@ Future<String> getAdbDeviceProperty(String deviceId, String property) async {
 
 Future<String> getMemoryInfo(String deviceId) async {
   try {
-    final ProcessResult result = await Process.run(
-      adbPath,
-      <String>['-s', deviceId, 'shell', 'cat', '/proc/meminfo'],
-      environment: toolEnvironment,
-    );
+    final ProcessResult result = await runAdb(<String>['-s', deviceId, 'shell', 'cat', '/proc/meminfo']);
     final String output = result.stdout.toString();
 
     int totalMem = int.parse(
@@ -160,7 +152,7 @@ Future<String> getStorageInfo(String deviceId) async {
     ];
 
     for (final List<String> command in commands) {
-      final ProcessResult result = await Process.run(adbPath, command, environment: toolEnvironment);
+      final ProcessResult result = await runAdb(command);
       final String parsed = _parseStorageFromDfOutput(result.stdout.toString());
       if (parsed != 'Unknown') {
         return parsed;
@@ -225,11 +217,7 @@ String _formatKbToGb(int kb) {
 
 Future<String> getAdbShellOutput(String deviceId, String command) async {
   try {
-    final ProcessResult result = await Process.run(
-      adbPath,
-      <String>['-s', deviceId, 'shell', command],
-      environment: toolEnvironment,
-    );
+    final ProcessResult result = await runAdb(<String>['-s', deviceId, 'shell', command]);
     return result.stdout.toString().trim();
   } catch (e) {
     print('Failed to get shell output: $e');

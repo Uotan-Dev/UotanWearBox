@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:async';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -615,7 +615,7 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
     });
 
     try {
-      final ProcessResult result = await Process.run(adbPath, args, environment: toolEnvironment);
+      final ProcessResult result = await runAdb(args);
       final String stderr = result.stderr.trim();
 
       if (result.exitCode == 0) {
@@ -647,7 +647,7 @@ class _MemoryCleanPageState extends State<MemoryCleanPage> {
   Future<bool> _ensureDeviceConnected({bool showDialog = true}) async {
     try {
       final ProcessResult result =
-          await Process.run(adbPath, <String>['devices'], environment: toolEnvironment);
+          await runAdb(<String>['devices']);
       final List<String> lines = result.stdout
           .toString()
           .split('\n')

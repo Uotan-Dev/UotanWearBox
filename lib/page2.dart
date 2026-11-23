@@ -1,5 +1,6 @@
 import 'miuix_titled_page.dart';
 import 'platform_support.dart';
+import 'adb_runner.dart';
 import 'app_theme.dart';
 import 'dart:math' as math;
 
@@ -62,7 +63,8 @@ class Page2 extends StatelessWidget {
           l10n.featureSectionAdvanced,
           [
             _FeatureAction.rePair,
-            _FeatureAction.flashTool,
+            // 刷机工具依赖 USB 连接的 fastboot，iOS 无法使用
+            if (fastbootSupported) _FeatureAction.flashTool,
           ]
         ),
       ];
@@ -361,12 +363,13 @@ class Page2 extends StatelessWidget {
         label: l10n.featureRePair,
         action: _FeatureAction.rePair,
       ),
-      _FeatureItemData(
-        iconPath:
-            'assets/icons/android_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
-        label: l10n.featureFlashTool,
-        action: _FeatureAction.flashTool,
-      ),
+      if (fastbootSupported)
+        _FeatureItemData(
+          iconPath:
+              'assets/icons/android_24dp_5F6368_FILL0_wght400_GRAD0_opsz24.png',
+          label: l10n.featureFlashTool,
+          action: _FeatureAction.flashTool,
+        ),
     ];
   }
 }

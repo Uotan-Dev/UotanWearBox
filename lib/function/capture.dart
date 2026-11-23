@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -102,7 +102,7 @@ class _CapturePageState extends State<CapturePage> {
                   Row(
                     children: <Widget>[
                       _buildModeButton(
-                        text: context.l10n.captureComputerFolder,
+                        text: _localFolderLabel(context),
                         isActive: _saveTarget == _SaveTarget.computer,
                         onTap: (_isBusy || _isRecording)
                             ? null
@@ -134,14 +134,17 @@ class _CapturePageState extends State<CapturePage> {
                     ),
                     child: Text(
                       _saveTarget == _SaveTarget.computer
-                          ? (_localDirectory ?? _defaultLocalDirectory())
+                          ? _localDirectoryLabel(context)
                           : _normalizedDeviceDirectory(),
                       style: const TextStyle(fontSize: 14),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (_saveTarget == _SaveTarget.computer)
+                  if (_saveTarget == _SaveTarget.computer &&
+                      exportsToFilesApp)
+                    const SizedBox.shrink()
+                  else if (_saveTarget == _SaveTarget.computer)
                     _buildActionButton(
                       text: context.l10n.captureChooseFolder,
                       onTap: (_isBusy || _isRecording)
@@ -227,7 +230,7 @@ class _CapturePageState extends State<CapturePage> {
                   MiuixOverlayDropdownPreference(
                     title: l10n.captureSaveLocation,
                     items: <String>[
-                      l10n.captureComputerFolder,
+                      _localFolderLabel(context),
                       l10n.captureDeviceFolder,
                     ],
                     selectedIndex: toComputer ? 0 : 1,
@@ -238,18 +241,24 @@ class _CapturePageState extends State<CapturePage> {
                           : _SaveTarget.device;
                     }),
                   ),
-                  MiuixArrowPreference(
-                    title: toComputer
-                        ? l10n.captureChooseFolder
-                        : l10n.captureSetDevicePath,
-                    summary: toComputer
-                        ? (_localDirectory ?? _defaultLocalDirectory())
-                        : _normalizedDeviceDirectory(),
-                    enabled: !locked,
-                    onClick: toComputer
-                        ? _selectLocalDirectory
-                        : _editDeviceDirectory,
-                  ),
+                  // iOS 只能导出到 App 文稿目录，显示为不可点击的位置说明
+                  if (toComputer && exportsToFilesApp)
+                    MiuixBasicComponent(
+                      title: _localDirectoryLabel(context),
+                    )
+                  else
+                    MiuixArrowPreference(
+                      title: toComputer
+                          ? l10n.captureChooseFolder
+                          : l10n.captureSetDevicePath,
+                      summary: toComputer
+                          ? (_localDirectory ?? _defaultLocalDirectory())
+                          : _normalizedDeviceDirectory(),
+                      enabled: !locked,
+                      onClick: toComputer
+                          ? _selectLocalDirectory
+                          : _editDeviceDirectory,
+                    ),
                 ],
               ),
               MiuixSectionTitle(l10n.captureSectionTitle),
@@ -414,11 +423,7 @@ class _CapturePageState extends State<CapturePage> {
     try {
       if (_saveTarget == _SaveTarget.device) {
         final String remotePath = '${_normalizedDeviceDirectory()}$fileName';
-        final ProcessResult result = await Process.run(
-          adbPath,
-          <String>['shell', 'screencap', '-p', remotePath],
-          environment: toolEnvironment,
-        );
+        final ProcessResult result = await runAdb(<String>['shell', 'screencap', '-p', remotePath]);
         if (result.exitCode != 0) {
           _showErrorDialog(
               _stderrOrDefault(result, context.l10n.captureScreenshotFailed));
@@ -433,30 +438,24 @@ class _CapturePageState extends State<CapturePage> {
       final String localPath = _joinLocalPath(localDir, fileName);
       Directory(localDir).createSync(recursive: true);
 
-      final ProcessResult capResult = await Process.run(
-        adbPath,
-        <String>['shell', 'screencap', '-p', remotePath],
-        environment: toolEnvironment,
-      );
+      final ProcessResult capResult = await runAdb(<String>['shell', 'screencap', '-p', remotePath]);
       if (capResult.exitCode != 0) {
         _showErrorDialog(
             _stderrOrDefault(capResult, context.l10n.captureScreenshotFailed));
         return;
       }
 
-      final ProcessResult pullResult = await Process.run(
-        adbPath,
-        <String>['pull', remotePath, localPath],
-        environment: toolEnvironment,
-      );
+      final ProcessResult pullResult = await runAdb(<String>['pull', remotePath, localPath]);
       if (pullResult.exitCode != 0) {
         _showErrorDialog(_stderrOrDefault(
             pullResult, context.l10n.captureScreenshotExportFailed));
         return;
       }
 
-      await Process.run(adbPath, <String>['shell', 'rm', '-f', remotePath], environment: toolEnvironment);
-      _showInfoDialog(context.l10n.captureScreenshotSavedComputer(localPath));
+      await runAdb(<String>['shell', 'rm', '-f', remotePath]);
+      _showInfoDialog(exportsToFilesApp
+          ? context.l10n.iosSavedToFilesApp(fileName)
+          : context.l10n.captureScreenshotSavedComputer(localPath));
     } catch (e) {
       _showErrorDialog(context.l10n.commandExecutionError(e.toString()));
     } finally {
@@ -481,16 +480,12 @@ class _CapturePageState extends State<CapturePage> {
 
     setState(() => _isBusy = true);
     try {
-      final ProcessResult result = await Process.run(
-        adbPath,
-        <String>[
+      final ProcessResult result = await runAdb(<String>[
           'shell',
           'sh',
           '-c',
           'screenrecord --bit-rate 8000000 "$remotePath" >/dev/null 2>&1 & echo \$!'
-        ],
-        environment: toolEnvironment,
-      );
+        ]);
 
       if (result.exitCode != 0) {
         _showErrorDialog(
@@ -532,7 +527,7 @@ class _CapturePageState extends State<CapturePage> {
 
     setState(() => _isBusy = true);
     try {
-      await Process.run(adbPath, <String>['shell', 'kill', '-2', pid], environment: toolEnvironment);
+      await runAdb(<String>['shell', 'kill', '-2', pid]);
       await Future<void>.delayed(const Duration(seconds: 1));
 
       if (target == _SaveTarget.device) {
@@ -547,20 +542,18 @@ class _CapturePageState extends State<CapturePage> {
       final String localPath = _joinLocalPath(localDir, fileName);
       Directory(localDir).createSync(recursive: true);
 
-      final ProcessResult pullResult = await Process.run(
-        adbPath,
-        <String>['pull', remotePath, localPath],
-        environment: toolEnvironment,
-      );
+      final ProcessResult pullResult = await runAdb(<String>['pull', remotePath, localPath]);
       if (pullResult.exitCode != 0) {
         _showErrorDialog(_stderrOrDefault(
             pullResult, context.l10n.captureRecordingExportFailed));
         return;
       }
 
-      await Process.run(adbPath, <String>['shell', 'rm', '-f', remotePath], environment: toolEnvironment);
+      await runAdb(<String>['shell', 'rm', '-f', remotePath]);
       _clearRecordState();
-      _showInfoDialog(context.l10n.captureRecordingSavedComputer(localPath));
+      _showInfoDialog(exportsToFilesApp
+          ? context.l10n.iosSavedToFilesApp(fileName)
+          : context.l10n.captureRecordingSavedComputer(localPath));
     } catch (e) {
       _showErrorDialog(context.l10n.commandExecutionError(e.toString()));
     } finally {
@@ -583,7 +576,7 @@ class _CapturePageState extends State<CapturePage> {
   Future<bool> _ensureDeviceConnected({bool showDialog = true}) async {
     try {
       final ProcessResult result =
-          await Process.run(adbPath, <String>['devices'], environment: toolEnvironment);
+          await runAdb(<String>['devices']);
       final List<String> lines = result.stdout
           .toString()
           .split('\n')
@@ -633,12 +626,15 @@ class _CapturePageState extends State<CapturePage> {
     return path;
   }
 
-  String _defaultLocalDirectory() {
-    final String? userProfile = Platform.environment['USERPROFILE'];
-    final String? home = Platform.environment['HOME'];
-    final String base = (userProfile ?? home ?? Directory.current.path).trim();
-    return _joinLocalPath(base, 'Desktop');
-  }
+  String _defaultLocalDirectory() => defaultExportDirectory();
+
+  String _localFolderLabel(BuildContext context) => exportsToFilesApp
+      ? context.l10n.iosFilesAppFolder
+      : context.l10n.captureComputerFolder;
+
+  String _localDirectoryLabel(BuildContext context) => exportsToFilesApp
+      ? context.l10n.iosFilesAppLocation
+      : (_localDirectory ?? _defaultLocalDirectory());
 
   String _joinLocalPath(String dir, String fileName) {
     if (dir.endsWith('\\') || dir.endsWith('/')) {

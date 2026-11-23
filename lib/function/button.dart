@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -185,7 +185,7 @@ class _ButtonPageState extends State<ButtonPage> {
 
     try {
       ProcessResult result =
-          await Process.run(adbPath, ['shell', 'input', 'keyevent', keycode], environment: toolEnvironment);
+          await runAdb(['shell', 'input', 'keyevent', keycode]);
       if (result.exitCode == 0) {
         debugPrint(context.l10n.buttonSendKeySuccess(keycode));
       } else {
@@ -200,7 +200,7 @@ class _ButtonPageState extends State<ButtonPage> {
 
   Future<bool> _checkDeviceConnection() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['devices'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['devices']);
       String output = result.stdout.toString();
       List<String> lines = output.split('\n');
       for (var line in lines.skip(1)) {

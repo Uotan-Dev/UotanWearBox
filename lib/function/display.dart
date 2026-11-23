@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +68,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
   // 检测设备是否连接
   Future<bool> _isDeviceConnected() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['devices'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['devices']);
       String output = result.stdout as String;
       return output.split('\n').any((line) => line.contains('\tdevice'));
     } catch (e) {
@@ -82,7 +82,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
   Future<void> _fetchCurrentDPI() async {
     try {
       ProcessResult result =
-          await Process.run(adbPath, ['shell', 'wm', 'density'], environment: toolEnvironment);
+          await runAdb(['shell', 'wm', 'density']);
       String output = result.stdout as String;
       if (!mounted) return;
       setState(() {
@@ -103,7 +103,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
   // 获取当前分辨率
   Future<void> _fetchCurrentResolution() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['shell', 'wm', 'size'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['shell', 'wm', 'size']);
       String output = result.stdout as String;
       if (!mounted) return;
       setState(() {
@@ -614,7 +614,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     if (dpi.isNotEmpty && await _isDeviceConnected()) {
       // 检测设备是否连接
       try {
-        await Process.run(adbPath, ['shell', 'wm', 'density', dpi], environment: toolEnvironment);
+        await runAdb(['shell', 'wm', 'density', dpi]);
         _showInfoDialog(context.l10n.displayDpiSetSuccess(dpi));
         _fetchCurrentDPI(); // 更新当前DPI
       } catch (e) {
@@ -630,7 +630,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     if (resolution.isNotEmpty && await _isDeviceConnected()) {
       // 检测设备是否连接
       try {
-        await Process.run(adbPath, ['shell', 'wm', 'size', resolution], environment: toolEnvironment);
+        await runAdb(['shell', 'wm', 'size', resolution]);
         _showInfoDialog(context.l10n.displayResolutionSetSuccess(resolution));
         _fetchCurrentResolution(); // 更新当前分辨率
       } catch (e) {
@@ -647,7 +647,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     if (await _isDeviceConnected()) {
       // 检测设备是否连接
       try {
-        await Process.run(adbPath, ['shell', 'wm', 'density', 'reset'], environment: toolEnvironment);
+        await runAdb(['shell', 'wm', 'density', 'reset']);
         _showInfoDialog(context.l10n.displayDpiResetSuccess);
         _fetchCurrentDPI(); // 更新当前DPI
       } catch (e) {
@@ -663,7 +663,7 @@ class _DisplaySettingsPageState extends State<DisplaySettingsPage> {
     if (await _isDeviceConnected()) {
       // 检测设备是否连接
       try {
-        await Process.run(adbPath, ['shell', 'wm', 'size', 'reset'], environment: toolEnvironment);
+        await runAdb(['shell', 'wm', 'size', 'reset']);
         _showInfoDialog(context.l10n.displayResolutionResetSuccess);
         _fetchCurrentResolution(); // 更新当前分辨率
       } catch (e) {

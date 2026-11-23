@@ -68,8 +68,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get featuresAppCenterTitle => 'アプリセンターを有効にする';
 
   @override
-  String get featuresAppCenterSubtitle =>
-      'ナビゲーションに「アプリ」ページを表示し、ウォッチアプリを閲覧・インストールできます';
+  String get featuresAppCenterSubtitle => 'ナビゲーションに「アプリ」ページを表示し、ウォッチアプリを閲覧・インストールできます';
 
   @override
   String get aboutLicensesTitle => 'オープンソースライセンス';
@@ -78,8 +77,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aboutWithdrawConsentTitle => 'プライバシーポリシーへの同意を撤回';
 
   @override
-  String get withdrawConsentMessage =>
-      '同意を撤回するとアプリは終了します。次回起動時に利用規約とプライバシーポリシーへの同意が再度必要になります。';
+  String get withdrawConsentMessage => '同意を撤回するとアプリは終了します。次回起動時に利用規約とプライバシーポリシーへの同意が再度必要になります。';
 
   @override
   String get withdrawConsentConfirm => '撤回して終了';
@@ -88,8 +86,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get consentDialogTitle => '利用規約とプライバシーポリシー';
 
   @override
-  String get consentDialogMessage =>
-      '柚坛手表助手へようこそ。ご利用の前に、以下の内容をお読みいただき同意してください：';
+  String get consentDialogMessage => '柚坛手表助手へようこそ。ご利用の前に、以下の内容をお読みいただき同意してください：';
 
   @override
   String get consentDisagree => '同意せずに終了';
@@ -659,8 +656,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deviceNotConnectedTitle => 'デバイス未接続';
 
   @override
-  String get deviceNotConnectedMessage =>
-      'デバイスが検出されません。ウォッチが接続され、USB デバッグが有効になっていることを確認してください。';
+  String get deviceNotConnectedMessage => 'デバイスが検出されません。ウォッチが接続され、USB デバッグが有効になっていることを確認してください。';
 
   @override
   String get buttonPageTitle => 'キー操作シミュレーター';
@@ -1961,4 +1957,21 @@ class AppLocalizationsJa extends AppLocalizations {
   String flashLogFailed(String action, String code) {
     return '失敗: $action（終了コード $code）';
   }
+
+  @override
+  String get iosFilesAppFolder => 'この iPhone（ファイル App）';
+
+  @override
+  String get iosFilesAppLocation => 'ファイル › この iPhone 内 › 柚坛手表助手';
+
+  @override
+  String iosSavedToFilesApp(String name) {
+    return 'ファイル App › この iPhone 内 › 柚坛手表助手 に保存しました:\n$name';
+  }
+
+  @override
+  String get wirelessIosHint => 'iOS ではネットワーク ADB でウォッチに接続します。ウォッチの開発者向けオプションで「ADB デバッグ（ネットワーク）」を有効にするか、先に PC で adb tcpip 5555 を実行してから、ウォッチの IP アドレスとポート（既定 5555）を入力してください。iPhone とウォッチは同じ Wi‑Fi に接続し、初回はウォッチで「許可」をタップしてください。Android 11 以降のペア設定コード方式の「ワイヤレス デバッグ」には未対応です。';
+
+  @override
+  String get wirelessConnecting => '接続中… 初回はウォッチでデバッグを許可してください';
 }

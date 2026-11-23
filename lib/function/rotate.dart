@@ -4,7 +4,7 @@ import '../miuix_dialog.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
-import '../platform_tools.dart';
+import '../adb_runner.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -176,8 +176,7 @@ class _RotatePageState extends State<RotatePage> {
     }
 
     try {
-      ProcessResult result = await Process.run(
-          adbPath, ['shell', 'settings', 'put', 'system', 'user_rotation', rotation], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['shell', 'settings', 'put', 'system', 'user_rotation', rotation]);
       if (result.exitCode == 0) {
         _showMessage(context, context.l10n.fileManagerSuccessTitle, context.l10n.rotateSuccessMessage(directionLabel));
       } else {
@@ -190,7 +189,7 @@ class _RotatePageState extends State<RotatePage> {
 
   Future<bool> _checkDeviceConnection() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['devices'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['devices']);
       String output = result.stdout.toString();
       List<String> lines = output.split('\n');
       for (var line in lines.skip(1)) {

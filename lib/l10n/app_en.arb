@@ -1192,5 +1192,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "iosFilesAppFolder": "This iPhone (Files app)",
+  "iosFilesAppLocation": "Files › On My iPhone › 柚坛手表助手",
+  "iosSavedToFilesApp": "Saved to Files › On My iPhone › 柚坛手表助手:\n{name}",
+  "@iosSavedToFilesApp": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "wirelessIosHint": "On iOS the watch is connected via network ADB: enable \"ADB debugging (network)\" in the watch's developer options, or run adb tcpip 5555 from a computer first, then enter the watch's IP address and port (default 5555). The phone and watch must be on the same Wi‑Fi; tap \"Allow\" on the watch the first time. Pairing-code \"Wireless debugging\" (Android 11+) is not supported yet.",
+  "wirelessConnecting": "Connecting… allow debugging on the watch if prompted"
 }

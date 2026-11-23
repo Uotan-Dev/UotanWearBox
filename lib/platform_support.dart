@@ -15,6 +15,9 @@ void startWindowDrag() {
   }
 }
 
+/// 是否允许应用自行退出（iOS 不支持也不允许程序主动退出）
+final bool canExitApp = kIsWeb || !Platform.isIOS;
+
 /// 退出应用：桌面端关闭窗口，移动端退出 Activity
 Future<void> closeApp() async {
   if (isDesktop) {

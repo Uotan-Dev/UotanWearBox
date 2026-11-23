@@ -6,13 +6,15 @@
 
 源码：[lib/platform_tools.dart](../lib/platform_tools.dart)
 
-所有调用都应使用全局的 `adbPath` / `fastbootPath`，**不要直接写 `'adb'`**。
+所有 adb / fastboot 调用都应通过 [lib/adb_runner.dart](../lib/adb_runner.dart) 的 `runAdb` / `runFastboot`，**不要直接 `Process.run('adb')`**：
 
 ```dart
-import 'platform_tools.dart';
+import 'adb_runner.dart';
 
-await Process.run(adbPath, <String>['devices']);
+final ProcessResult result = await runAdb(<String>['devices']);
 ```
+
+桌面端与 Android 上二者等价于 `Process.run(adbPath, args, environment: toolEnvironment)`；iOS 上见下文「iOS：进程内 ADB」。
 
 解析规则：
 
@@ -111,3 +113,26 @@ Future<ProcessResult?> _runAdb(List<String> args) async {
 源码：[lib/wireless.dart](../lib/wireless.dart)
 
 用户输入 `IP:端口` 后执行 `adb connect <target>`，连接成功后设备会出现在 `adb devices` 中，由轮询自动识别。电脑与手表需处于同一子网。
+
+## iOS：进程内 ADB
+
+源码：[lib/adb/](../lib/adb/)、[lib/adb_runner.dart](../lib/adb_runner.dart)
+
+iOS 沙盒禁止创建子进程，无法运行 adb 可执行文件，因此 iOS 版用纯 Dart 实现了 ADB 主机端协议，`runAdb` 会把命令行参数交给 `AdbHost` 模拟执行，输出格式与桌面 adb 保持一致，各功能页无需区分平台。
+
+| 文件 | 说明 |
+| :--- | :--- |
+| `adb_protocol.dart` | 24 字节消息头编解码（CNXN / AUTH / OPEN / OKAY / WRTE / CLSE） |
+| `adb_key.dart` | 2048 位 RSA 密钥生成、token 签名、Android 格式公钥（adbkey.pub） |
+| `adb_connection.dart` | TCP 连接、认证、多路复用流、shell v2（区分 stdout/stderr/退出码）、sync（STAT/LIST/SEND/RECV） |
+| `adb_host.dart` | 模拟 `devices`、`connect`、`disconnect`、`-s`、`shell`、`push`、`pull`（含目录）、`install`、`reboot` |
+
+要点：
+
+- 仅支持传统网络调试（`adb tcpip 5555` / 「ADB 调试（网络）」）。Android 11+「无线调试」需要配对码（SPAKE2）+ TLS，暂不支持，连接时会给出提示
+- 密钥首次使用时在后台 isolate 生成，保存在 SharedPreferences（`adb_host_key`）；首次连接需在手表上点「允许」
+- 连接过的设备记录在 `adb_known_targets`，App 回到前台或轮询时自动静默重连（只接受已授权的设备）
+- `install` 先推送到 `/data/local/tmp` 再执行 `pm install`，结束后删除临时文件
+- fastboot 需要 USB，iOS 上隐藏刷机工具，`runFastboot` 直接返回失败
+- 导出文件（截屏、录屏、提取 APK、文件管理下载）保存在 App 文稿目录，在「文件」App ›「我的 iPhone」›「柚坛手表助手」中可见
+- 协议单元测试：`flutter test test/adb_host_test.dart`（内置一个模拟 adbd，会校验 RSA 签名与公钥格式）

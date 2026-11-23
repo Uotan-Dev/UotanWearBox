@@ -3576,6 +3576,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed: {action} (exit code {code})'**
   String flashLogFailed(String action, String code);
+
+  /// No description provided for @iosFilesAppFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'This iPhone (Files app)'**
+  String get iosFilesAppFolder;
+
+  /// No description provided for @iosFilesAppLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Files › On My iPhone › 柚坛手表助手'**
+  String get iosFilesAppLocation;
+
+  /// No description provided for @iosSavedToFilesApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved to Files › On My iPhone › 柚坛手表助手:\n{name}'**
+  String iosSavedToFilesApp(String name);
+
+  /// No description provided for @wirelessIosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'On iOS the watch is connected via network ADB: enable \"ADB debugging (network)\" in the watch\'s developer options, or run adb tcpip 5555 from a computer first, then enter the watch\'s IP address and port (default 5555). The phone and watch must be on the same Wi‑Fi; tap \"Allow\" on the watch the first time. Pairing-code \"Wireless debugging\" (Android 11+) is not supported yet.'**
+  String get wirelessIosHint;
+
+  /// No description provided for @wirelessConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting… allow debugging on the watch if prompted'**
+  String get wirelessConnecting;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

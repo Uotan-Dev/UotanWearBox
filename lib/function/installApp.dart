@@ -3,6 +3,7 @@ import '../miuix_titled_page.dart';
 import '../platform_support.dart';
 import '../app_theme.dart';
 import 'dart:io';
+import '../adb_runner.dart';
 import '../platform_tools.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -179,10 +180,22 @@ class _InstallAppPageState extends State<InstallAppPage> {
     }
 
     // 使用文件选择器选择APK文件
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['apk'],
-    );
+    // iOS 没有 apk 对应的系统文件类型，按扩展名过滤会导致所有文件都不可选，
+    // 因此在 iOS 上放开类型，选择后再校验扩展名
+    FilePickerResult? result = Platform.isIOS
+        ? await FilePicker.platform.pickFiles(type: FileType.any)
+        : await FilePicker.platform.pickFiles(
+            type: FileType.custom,
+            allowedExtensions: ['apk'],
+          );
+
+    if (result != null &&
+        result.files.isNotEmpty &&
+        !result.files.single.name.toLowerCase().endsWith('.apk')) {
+      if (!mounted) return;
+      _showMessage(context, l10n.installTipTitle, l10n.installNoFileSelected);
+      return;
+    }
 
     if (result != null && result.files.isNotEmpty) {
       // 获取所选文件的路径
@@ -195,6 +208,31 @@ class _InstallAppPageState extends State<InstallAppPage> {
 
       // 运行ADB命令进行安装
       try {
+        if (adbInProcess) {
+          // iOS 无法启动子进程，由进程内的 adb 实现完成推送与安装
+          final ProcessResult installResult =
+              await runAdb(['install', '-r', filePath]);
+          if (!mounted) return;
+          final String output = (installResult.exitCode == 0
+                  ? installResult.stdout
+                  : installResult.stderr)
+              .toString()
+              .trim();
+          setState(() {
+            _isInstalling = false;
+            _installingMessage = output;
+          });
+          final bool ok = installResult.exitCode == 0;
+          _showMessage(
+            context,
+            ok ? l10n.installSuccessTitle : l10n.installFailureTitle,
+            ok
+                ? l10n.installSuccessMessage
+                : (output.isNotEmpty ? output : l10n.installFailureMessage),
+          );
+          return;
+        }
+
         // 使用 Process.start 来启动异步进程
         Process process = await Process.start(adbPath, ['install', '-r', filePath], environment: toolEnvironment);
 
@@ -239,7 +277,7 @@ class _InstallAppPageState extends State<InstallAppPage> {
   // 检查是否有设备连接
   Future<bool> _checkDeviceConnection() async {
     try {
-      ProcessResult result = await Process.run(adbPath, ['devices'], environment: toolEnvironment);
+      ProcessResult result = await runAdb(['devices']);
       String output = result.stdout.toString();
 
       // 过滤掉第一行标题，并检查是否有任何设备行存在

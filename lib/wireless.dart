@@ -4,7 +4,7 @@ import 'platform_support.dart';
 import 'app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_miuix/miuix.dart';
-import 'platform_tools.dart';
+import 'adb_runner.dart';
 import 'package:watch_assistant/l10n/l10n.dart';
 import 'dart:io';
 
@@ -17,7 +17,10 @@ class WirelessPage extends StatefulWidget {
 
 class _WirelessPageState extends State<WirelessPage> {
   final TextEditingController _ipController = TextEditingController();
-  final TextEditingController _portController = TextEditingController();
+  // iOS 只能连接传统的网络 ADB（adb tcpip），默认端口为 5555
+  final TextEditingController _portController =
+      TextEditingController(text: adbInProcess ? '5555' : null);
+  bool _connecting = false;
 
   @override
   void dispose() {
@@ -43,6 +46,15 @@ class _WirelessPageState extends State<WirelessPage> {
                 color: MiuixTheme.of(context).colors.onBackgroundVariant,
               ),
             ),
+            if (adbInProcess)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                child: MiuixText(
+                  l10n.wirelessIosHint,
+                  style: MiuixTheme.of(context).textStyles.footnote1,
+                  color: MiuixTheme.of(context).colors.onBackgroundVariant,
+                ),
+              ),
             MiuixTextField(
               label: l10n.wirelessIpLabel,
               colors: _narrowInputColors(context),
@@ -63,8 +75,10 @@ class _WirelessPageState extends State<WirelessPage> {
             ),
             const SizedBox(height: 20),
             MiuixButton(
-              onPressed: _connectDevice,
-              child: Text(l10n.wirelessConnectButton),
+              onPressed: _connecting ? null : _connectDevice,
+              child: Text(_connecting
+                  ? l10n.wirelessConnecting
+                  : l10n.wirelessConnectButton),
             ),
           ],
         ),
@@ -122,6 +136,12 @@ class _WirelessPageState extends State<WirelessPage> {
             Text(context.l10n.wirelessHeaderIntro,
                 style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 10),
+            if (adbInProcess) ...[
+              Text(context.l10n.wirelessIosHint,
+                  style: TextStyle(
+                      fontSize: 14, color: context.palette.textSecondary)),
+              const SizedBox(height: 10),
+            ],
 
             // IP 地址输入框
             _buildTextField(context.l10n.wirelessIpLabel, _ipController),
@@ -133,7 +153,11 @@ class _WirelessPageState extends State<WirelessPage> {
             const SizedBox(height: 20),
 
             // 连接按钮
-            _buildButton(context.l10n.wirelessConnectButton, _connectDevice),
+            _buildButton(
+                _connecting
+                    ? context.l10n.wirelessConnecting
+                    : context.l10n.wirelessConnectButton,
+                _connecting ? null : _connectDevice),
           ],
         ),
       ),
@@ -167,7 +191,7 @@ class _WirelessPageState extends State<WirelessPage> {
   }
 
   /// **构建按钮**
-  Widget _buildButton(String text, VoidCallback onPressed) {
+  Widget _buildButton(String text, VoidCallback? onPressed) {
     return Card(
       color: context.palette.surface,
       shape: RoundedRectangleBorder(
@@ -206,9 +230,9 @@ class _WirelessPageState extends State<WirelessPage> {
     }
 
     String target = "$ip:$port";
+    setState(() => _connecting = true);
     try {
-      ProcessResult result = await Process.run(adbPath, ['connect', target],
-          environment: toolEnvironment);
+      ProcessResult result = await runAdb(['connect', target]);
       if (!mounted) return;
       if (result.stdout.contains("connected to")) {
         _showMessage(context, context.l10n.wirelessSuccessTitle,
@@ -224,6 +248,8 @@ class _WirelessPageState extends State<WirelessPage> {
       if (!mounted) return;
       _showMessage(context, context.l10n.wirelessErrorTitle,
           context.l10n.wirelessExecutionFailed(e.toString()));
+    } finally {
+      if (mounted) setState(() => _connecting = false);
     }
   }
 

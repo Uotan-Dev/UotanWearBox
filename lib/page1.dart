@@ -3,7 +3,7 @@ import 'app_theme.dart';
 
 import 'dart:io';
 
-import 'platform_tools.dart';
+import 'adb_runner.dart';
 
 import 'package:flutter/material.dart';
 import 'package:watch_assistant/wireless.dart';
@@ -1102,14 +1102,11 @@ class _Page1State extends State<Page1> {
       return;
     }
     try {
-      final ProcessResult result = await Process.run(
-          adbPath,
-          <String>[
+      final ProcessResult result = await runAdb(<String>[
             '-s',
             selectedAdbId,
             ...args,
-          ],
-          environment: toolEnvironment);
+          ]);
       if (!mounted) {
         return;
       }
