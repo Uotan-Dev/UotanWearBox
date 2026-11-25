@@ -26,7 +26,9 @@
 
 </div>
 
+<br>
 
+<a href="https://apps.apple.com/us/app/%E6%9F%9A%E5%9D%9B%E6%89%8B%E8%A1%A8%E5%8A%A9%E6%89%8B/id6838520266"><img width="109" height="40" alt="Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917" src="https://github.com/user-attachments/assets/57fa8d85-20e9-4e6f-9401-a101dec2f147" /></a>
 
 </div>
 
