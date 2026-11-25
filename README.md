@@ -28,7 +28,14 @@
 
 <br>
 
-<a href="https://apps.apple.com/us/app/%E6%9F%9A%E5%9D%9B%E6%89%8B%E8%A1%A8%E5%8A%A9%E6%89%8B/id6838520266"><img width="109" height="40" alt="Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917" src="https://github.com/user-attachments/assets/57fa8d85-20e9-4e6f-9401-a101dec2f147" /></a>
+<p align="center">
+  <a href="https://apps.apple.com/us/app/id6838520266"><img height="40" alt="App Store" src="https://github.com/user-attachments/assets/57fa8d85-20e9-4e6f-9401-a101dec2f147" /></a>
+  &nbsp;
+  <img height="40" alt="Google Play" src="https://github.com/user-attachments/assets/551d31e5-fa20-47ef-807a-97472977d15d" />
+  &nbsp;
+  <a href="https://get.microsoft.com/installer/download?referrer=appbadge"><img height="40" alt="Microsoft Store" src="https://get.microsoft.com/images/zh-cn%20dark.svg" /></a>
+</p>
+
 
 </div>
 
