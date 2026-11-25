@@ -18,15 +18,16 @@
 
 <br>
 
+<!--
 <div id="badges">
-	<!--	<a href="https://github.com/Gnayoah/UotanWatchAssistant/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>-->
+		<a href="https://github.com/Gnayoah/UotanWatchAssistant/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
 		<a href="https://github.com/Gnayoah/UotanWatchAssistant"><img src="https://img.shields.io/github/v/release/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
 		<a href="https://github.com/Gnayoah/UotanWatchAssistant"><img src="https://img.shields.io/github/created-at/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
-	</div>
+	</div> -->
 
 </div>
 
-<br>
+
 
 <p align="center">
   <a href="https://apps.apple.com/us/app/id6838520266"><img height="40" alt="App Store" src="https://github.com/user-attachments/assets/57fa8d85-20e9-4e6f-9401-a101dec2f147" /></a>
