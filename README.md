@@ -18,20 +18,30 @@
 
 <br>
 
+<!--
 <div id="badges">
-	<!--	<a href="https://github.com/Gnayoah/UotanWatchAssistant/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>-->
+		<a href="https://github.com/Gnayoah/UotanWatchAssistant/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
 		<a href="https://github.com/Gnayoah/UotanWatchAssistant"><img src="https://img.shields.io/github/v/release/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
 		<a href="https://github.com/Gnayoah/UotanWatchAssistant"><img src="https://img.shields.io/github/created-at/Gnayoah/UotanWatchAssistant?style=for-the-badge"/></a>
-	</div>
+	</div> -->
 
 </div>
 
 
 
+<p align="center">
+  <a href="https://apps.apple.com/us/app/id6838520266"><img height="40" alt="App Store" src="https://github.com/user-attachments/assets/57fa8d85-20e9-4e6f-9401-a101dec2f147" /></a>
+  &nbsp;
+  <img height="40" alt="Google Play" src="https://github.com/user-attachments/assets/551d31e5-fa20-47ef-807a-97472977d15d" />
+  &nbsp;
+  <a href="https://get.microsoft.com/installer/download?referrer=appbadge"><img height="40" alt="Microsoft Store" src="https://get.microsoft.com/images/zh-cn%20dark.svg" /></a>
+</p>
+
+
 </div>
 
 
-
+<!--
 <a id="chinese"></a>
 
 #
@@ -41,7 +51,7 @@ banner
 <br><img width="1280" height="640" alt="Desktop 12" src="https://github.com/user-attachments/assets/930b933e-7bcf-44d8-8af4-2a165c55d493" />-->
 
 
-
+<!--
 <img width="5780" height="2510" alt="Frame 11" src="https://github.com/user-attachments/assets/10fe2f6f-8096-455e-940b-81ced76498c5" />
 
 
