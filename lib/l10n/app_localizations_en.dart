@@ -659,6 +659,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceNotConnectedMessage => 'No device detected. Make sure your watch is connected and USB debugging is enabled.';
 
   @override
+  String get androidFileTransferRunningTitle => 'Please quit Android File Transfer';
+
+  @override
+  String get androidFileTransferRunningMessage => 'Android File Transfer is running. It takes over Android devices connected via USB, so your watch can\'t be detected.\nPlease quit Android File Transfer (including Android File Transfer Agent in the menu bar), then unplug and reconnect the cable.';
+
+  @override
   String get buttonPageTitle => 'Button simulation';
 
   @override
@@ -1551,112 +1557,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyParagraph2 => 'Uotan WearBox Privacy Policy';
 
   @override
-  String get privacyParagraph3 => 'Last updated: September 19, 2024';
+  String get privacyParagraph3 => 'Last updated: November 25, 2026';
 
   @override
-  String get privacyParagraph4 => 'Welcome to Uotan WearBox (the “App”). We understand the importance of personal information and undertake to comply strictly with applicable laws and regulations and adopt appropriate security measures to protect it. Before using the App, please read and fully understand this Privacy Policy.';
+  String get privacyParagraph4 => 'Welcome to Uotan WearBox (the \"App\"). We take your privacy seriously. This Privacy Policy explains how the App handles information related to you. In short: the App does not collect, store or share any of your personal information.';
 
   @override
-  String get privacyParagraph5 => '1. Information we collect';
+  String get privacyParagraph5 => '1. We Do Not Collect Any Personal Information';
 
   @override
-  String get privacyParagraph6 => '1. Internet Protocol address: We collect your IP address only when necessary to ensure the proper operation and security of the App. Apart from your IP address, we do not collect other information that identifies you personally.';
+  String get privacyParagraph6 => 'The App does not require registration or login. We do not collect, store or upload your name, contact details, location, device identifiers, contacts, photos or any other personal information, and we do not track your usage. The App contains no third-party analytics, advertising or crash-reporting SDKs.';
 
   @override
-  String get privacyParagraph7 => '2. Required permissions:';
+  String get privacyParagraph7 => '2. Network Access';
 
   @override
-  String get privacyParagraph8 => '     - Network access: The App requires network access for data transfers, server communication, and feature updates.\n     - Device information: To improve performance and compatibility, we may read device information such as the model and operating system version.\n     - Storage access: The App may read and write device storage to cache data, save user settings, and provide offline features.';
+  String get privacyParagraph8 => '1. Connecting to your watch: the App communicates directly with the watch you specify over the local network via ADB. Device information, files, screenshots and other data are transferred only between your phone (or computer) and your watch, and never pass through or get uploaded to our servers.';
 
   @override
-  String get privacyParagraph9 => '2. How we use information';
+  String get privacyParagraph9 => '2. Update check: the App requests the latest version number from our server. This request contains no personal information or device identifiers; we do not use it to identify you and do not share it with any third party.';
 
   @override
-  String get privacyParagraph10 => '1. Providing and maintaining services: We use the IP address and device information collected to ensure the App operates properly, improve its features, and continually enhance the user experience.';
+  String get privacyParagraph10 => '3. Permissions';
 
   @override
-  String get privacyParagraph11 => '2. Security: We use IP addresses and device information for security monitoring and risk prevention, including preventing fraud, network attacks, and other activities that may compromise system security.';
+  String get privacyParagraph11 => 'To provide the features above, the App uses the following permissions only when needed:';
 
   @override
-  String get privacyParagraph12 => '3. Legal basis for processing personal information';
+  String get privacyParagraph12 => '- Network and local network: to connect to a watch on the same local network and to check for updates.\n- File access: only when you choose a file, to read the selected file and transfer it to your watch, or to save files you export from your watch to a location you choose. The App never reads your photo library or other files on its own.\n- Local storage: to keep the App\'s settings and the key used for ADB connections on your device. This data never leaves your device.';
 
   @override
-  String get privacyParagraph13 => 'For users in mainland China, we collect and use personal information to provide products and/or services in accordance with the Cybersecurity Law of the People’s Republic of China, Information Security Technology — Personal Information Security Specification (GB/T 35273-2017), and other applicable laws and regulations. We generally collect personal information only with your consent. In some cases, collection may be necessary to meet legal obligations, perform a contract, or protect your vital interests or those of others.';
+  String get privacyParagraph13 => '4. Sharing, Transfer and Public Disclosure';
 
   @override
-  String get privacyParagraph14 => '4. Sharing, transferring, and publicly disclosing information';
+  String get privacyParagraph14 => 'Since we do not collect any of your personal information, we do not share, transfer or publicly disclose any personal information to any third party.';
 
   @override
-  String get privacyParagraph15 => '1. Legal requirements: We may disclose personal information when lawfully required by judicial or governmental authorities, subject to applicable laws and regulations.';
+  String get privacyParagraph15 => '5. Data Storage and Deletion';
 
   @override
-  String get privacyParagraph16 => '2. Business transfers: In a merger, acquisition, asset transfer, or similar transaction, your personal information may be transferred as an asset. We will require the new holder to remain bound by this Policy or obtain your consent again.';
+  String get privacyParagraph16 => 'Settings and ADB keys created by the App are stored only on your device. You can delete them at any time by clearing the App\'s data or uninstalling the App.';
 
   @override
-  String get privacyParagraph17 => '3. Unauthorized disclosure: We will not publicly disclose your personal information without your explicit consent.';
+  String get privacyParagraph17 => '6. Children\'s Privacy';
 
   @override
-  String get privacyParagraph18 => '4. Exceptions to consent for sharing, transferring, or publicly disclosing personal information';
+  String get privacyParagraph18 => 'The App does not collect any personal information, including that of minors. If you are under 18, we recommend using the App under the guidance of a parent or legal guardian.';
 
   @override
-  String get privacyParagraph19 => 'Under applicable laws and regulations, we may share, transfer, or publicly disclose personal information without your consent in the following circumstances:';
+  String get privacyParagraph19 => '7. Changes to This Policy';
 
   @override
-  String get privacyParagraph20 => '    - Matters concerning national security or national defense;\n    - Matters concerning public security, public health, or major public interests;\n    - Criminal investigations, prosecutions, trials, or enforcement of judgments;\n    - Protecting major lawful rights and interests, such as life or property, when obtaining consent is difficult;\n    - Personal information you have made public yourself;\n    - Information collected from lawful public disclosures, such as legitimate news reports or government disclosures;\n    - Other circumstances prescribed by law.';
+  String get privacyParagraph20 => 'If the App\'s features or data handling change, we will update this Privacy Policy accordingly and publish the updated version and date on this page.';
 
   @override
-  String get privacyParagraph21 => '5. Storage and protection of information';
+  String get privacyParagraph21 => '8. Contact Us';
 
   @override
-  String get privacyParagraph22 => '1. Storage: We store information collected from you in the People’s Republic of China or the Hong Kong Special Administrative Region. For cross-border transfers, we will separately notify you by a pop-up or email of the purpose, recipient, and other details, and obtain your consent. We will ensure the recipient has adequate data protection capabilities.';
+  String get privacyParagraph22 => 'If you have any questions or suggestions about this Privacy Policy, please contact us:\nEmail: support@Gnayoah.com';
 
   @override
-  String get privacyParagraph23 => '2. Security measures: We strive to protect your personal information through physical, electronic, and administrative safeguards that meet industry standards. We establish data classification systems and standards for data security management and secure development to govern storage and use, and ensure we do not collect personal information unrelated to our services.';
-
-  @override
-  String get privacyParagraph24 => '3. Security incidents: Although we make every effort to secure the information you send us, technical limitations and malicious activity on the Internet mean that absolute security cannot be guaranteed. Systems and communication networks used to access our services may experience problems beyond our control.';
-
-  @override
-  String get privacyParagraph25 => 'We maintain warning mechanisms and emergency plans to prevent security incidents. If a personal information security incident occurs, we will promptly inform you, as required by law, of its nature and potential impact, measures taken or planned, advice on reducing risks, and remedies available to you. We will immediately activate our emergency plan to minimize losses. We will notify you by telephone, push notification, or other means, or issue a reasonable and effective public announcement if individual notification is difficult. We will also report our response to regulators as required and cooperate closely with government authorities.';
-
-  @override
-  String get privacyParagraph26 => '6. Your rights';
-
-  @override
-  String get privacyParagraph27 => '1. Access and correction: You have the right to access and update your personal information. To exercise these rights, contact us using the details in this Policy.';
-
-  @override
-  String get privacyParagraph28 => '2. Deletion and withdrawal of consent: Subject to applicable laws, you may request deletion of your personal information or withdraw consent. Deletion or withdrawal may prevent us from continuing to provide some or all services.';
-
-  @override
-  String get privacyParagraph29 => '7. Protection of minors';
-
-  @override
-  String get privacyParagraph30 => 'We take the protection of minors’ personal information seriously. If you are under 18, use the App with the consent and guidance of a parent or legal guardian, and provide personal information only with their consent.';
-
-  @override
-  String get privacyParagraph31 => '8. Updates to this Privacy Policy';
-
-  @override
-  String get privacyParagraph32 => 'We may revise this Policy as our business develops or laws and regulations change. Revisions will be published on this page and take effect upon publication. Please review this Policy regularly to learn about the latest privacy protections.';
-
-  @override
-  String get privacyParagraph33 => '9. Governing law and dispute resolution';
-
-  @override
-  String get privacyParagraph34 => 'The formation, effectiveness, performance, interpretation, and dispute resolution of this Policy are governed by the laws of the People’s Republic of China. Disputes shall be resolved through amicable consultation; if consultation fails, either party may bring proceedings in the people’s court with jurisdiction where the App is based.';
-
-  @override
-  String get privacyParagraph35 => '10. Contact us';
-
-  @override
-  String get privacyParagraph36 => 'If you have questions, comments, or suggestions about this Policy, or wish to exercise your rights, contact us at:\nEmail: support@Gnayoah.com';
-
-  @override
-  String get privacyParagraph37 => 'We will review the matter as soon as possible and respond promptly after receiving your request.';
-
-  @override
-  String get privacyParagraph38 => 'Thank you for your trust in and support of Uotan WearBox.';
+  String get privacyParagraph23 => 'Thank you for trusting and supporting Uotan WearBox.';
 
   @override
   String get agreementParagraph1 => 'User Agreement';
@@ -1970,7 +1931,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get wirelessIosHint => 'On iOS the watch is connected via network ADB: enable \"ADB debugging (network)\" in the watch\'s developer options, or run adb tcpip 5555 from a computer first, then enter the watch\'s IP address and port (default 5555). The phone and watch must be on the same Wi‑Fi; tap \"Allow\" on the watch the first time. Pairing-code \"Wireless debugging\" (Android 11+) is not supported yet.';
+  String get wirelessIosHint => 'This version connects to the watch via network ADB: enable \"ADB debugging (network)\" in the watch\'s developer options, or run adb tcpip 5555 from a computer first, then enter the watch\'s IP address and port (default 5555). The phone and watch must be on the same Wi‑Fi; tap \"Allow\" on the watch the first time. Pairing-code \"Wireless debugging\" (Android 11+) is not supported yet.';
 
   @override
   String get wirelessConnecting => 'Connecting… allow debugging on the watch if prompted';

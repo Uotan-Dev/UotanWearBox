@@ -4,6 +4,7 @@ import 'package:flutter_miuix/miuix.dart';
 
 import 'app_theme.dart';
 import 'miuix_titled_page.dart';
+import 'native_tab_bar.dart';
 
 /// 全局 miuix Snackbar 队列，由 [AppSnackbarHost] 统一显示
 final MiuixSnackbarHostState appSnackbarState = MiuixSnackbarHostState();
@@ -27,7 +28,9 @@ class AppSnackbarHost extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppPalette palette = context.palette;
     final double bottom = MediaQuery.paddingOf(context).bottom +
-        (isNarrowLayout(context) ? AppBottomBar.totalHeight : 0);
+        (isNarrowLayout(context)
+            ? (useNativeTabBar ? NativeTabBar.height : AppBottomBar.totalHeight)
+            : 0);
     return Padding(
       padding: EdgeInsets.only(bottom: bottom),
       child: MiuixTheme(

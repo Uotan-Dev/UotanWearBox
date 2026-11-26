@@ -1,3 +1,4 @@
+import 'app_prefs.dart';
 import 'app_snackbar.dart';
 import 'miuix_titled_page.dart';
 import 'platform_support.dart';
@@ -57,18 +58,20 @@ class Page3 extends StatelessWidget {
           );
         },
       ),
-      _SettingOption(
-        svg: 'features',
-        title: l10n.settingsFeaturesTitle,
-        subtitle: l10n.settingsFeaturesSubtitle,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const FeaturesSettingsPage()),
-          );
-        },
-      ),
+      // 「功能」页目前只有应用中心开关，不提供应用中心的平台不显示
+      if (appCenterAvailable)
+        _SettingOption(
+          svg: 'features',
+          title: l10n.settingsFeaturesTitle,
+          subtitle: l10n.settingsFeaturesSubtitle,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const FeaturesSettingsPage()),
+            );
+          },
+        ),
     ];
 
     final faqOptions = [

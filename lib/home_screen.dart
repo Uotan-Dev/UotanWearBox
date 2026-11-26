@@ -11,10 +11,13 @@ import 'adb_device_info.dart';
 import 'app_prefs.dart';
 import 'privacy_consent.dart';
 import 'app_sidebar.dart';
+import 'native_tab_bar.dart';
 import 'page1.dart';
 import 'page2.dart';
 import 'page3.dart';
 import 'page_transition.dart';
+import 'platform_support.dart';
+import 'platform_tools.dart';
 import 'store_page.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -63,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   }
 
   List<AdbDeviceInfo> _devices = []; // 用于存储设备信息
-  double currentVersion = 17.0; // 当前应用版本号
+  static const String currentVersion = '17.0.1'; // 当前应用版本号（与 pubspec 的 version 一致）
   bool _isCheckingUpdate = true; // 是否显示启动页
 
   @override
@@ -108,6 +111,36 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
     }
     // 进入主界面后在后台检查更新，不阻塞使用；仅有新版本时弹出提示，失败时静默
     _checkForUpdates();
+    _warnIfAndroidFileTransferRunning();
+  }
+
+  bool _androidFileTransferWarningShown = false;
+
+  /// macOS 上 Android File Transfer 会独占 USB 连接的安卓设备，导致无法识别手表。
+  /// 启动时提示一次；之后用户手动刷新且仍未检测到设备时再次提示
+  Future<void> _warnIfAndroidFileTransferRunning({bool force = false}) async {
+    if (_androidFileTransferWarningShown && !force) {
+      return;
+    }
+    if (!await isAndroidFileTransferRunning() || !mounted) {
+      return;
+    }
+    _androidFileTransferWarningShown = true;
+    final l10n = context.l10n;
+    await showMiuixDialog<void>(
+      context: context,
+      builder: (context) => MiuixAlertDialog(
+        backgroundColor: context.palette.surface,
+        title: Text(l10n.androidFileTransferRunningTitle),
+        content: Text(l10n.androidFileTransferRunningMessage),
+        actions: [
+          MiuixDialogButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.dialogOk),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _refreshDevicesNow() async {
@@ -119,6 +152,9 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
       setState(() {
         _devices = devices;
       });
+      if (devices.isEmpty) {
+        await _warnIfAndroidFileTransferRunning(force: true);
+      }
     } catch (e) {
       print('Failed to refresh devices: $e');
     }
@@ -133,24 +169,17 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
 
       if (response.statusCode == 200) {
         final lines = response.body.split('\n');
-        double _safeParseDouble(String s) {
-          return double.tryParse(s) ?? 0.0;
-        }
-
-// 使用
-        final remoteVersion = _safeParseDouble(
-          lines
-              .firstWhere((line) => line.startsWith('[version]'))
-              .replaceAll('[version]', '')
-              .trim(),
-        );
+        final remoteVersion = lines
+            .firstWhere((line) => line.startsWith('[version]'))
+            .replaceAll('[version]', '')
+            .trim();
 
         final releaseDate = lines
             .firstWhere((line) => line.startsWith('[date]'))
             .replaceAll('[date]', '')
             .trim();
 
-        if (remoteVersion > currentVersion) {
+        if (_compareVersions(remoteVersion, currentVersion) > 0) {
           if (mounted) {
             _showUpdateDialog(remoteVersion, releaseDate);
           }
@@ -167,7 +196,20 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
   }
 
   // 显示更新提示框，带有发布日期和去更新按钮
-  void _showUpdateDialog(double remoteVersion, String releaseDate) {
+  /// 按「主.次.修订」逐段比较版本号（如 17.0.1 与 16.2），a 较新返回正数
+  static int _compareVersions(String a, String b) {
+    List<int> parts(String v) =>
+        v.split('.').map((s) => int.tryParse(s.trim()) ?? 0).toList();
+    final List<int> pa = parts(a), pb = parts(b);
+    for (int i = 0; i < pa.length || i < pb.length; i++) {
+      final int x = i < pa.length ? pa[i] : 0;
+      final int y = i < pb.length ? pb[i] : 0;
+      if (x != y) return x - y;
+    }
+    return 0;
+  }
+
+  void _showUpdateDialog(String remoteVersion, String releaseDate) {
     showMiuixDialog(
       context: context,
       barrierDismissible: true, // 非强制更新，允许点击对话框外部区域关闭
@@ -192,12 +234,15 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
                 foregroundColor: MaterialStateProperty.all<Color>(
                     context.palette.text), // 文本颜色
               ),
-              child: Text(l10n.updateDialogLater),
+              // 商店版本只能通过商店更新，仅提示有新版本，不提供跳转下载
+              child: Text(
+                  isStoreBuild ? l10n.dialogOk : l10n.updateDialogLater),
               onPressed: () {
                 Navigator.of(context).pop(); // 关闭对话框
               },
             ),
-            MiuixDialogButton(
+            if (!isStoreBuild)
+              MiuixDialogButton(
               style: ButtonStyle(
                 overlayColor: MaterialStateProperty.resolveWith<Color?>(
                   (Set<MaterialState> states) {
@@ -266,6 +311,15 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
         // 只有最后一次点击触发的动画结束时才恢复跟随滑动
         if (token == _pageAnimationToken) {
           _pageAnimationToken = 0;
+          // 动画被手指按住打断时页面停在别处，导航栏选中项与实际页面对齐
+          if (mounted && controller.hasClients) {
+            final int page = controller.page?.round() ?? index;
+            if (page != _selectedIndex && page >= 0 && page < _tabs.length) {
+              setState(() {
+                _selectedIndex = page;
+              });
+            }
+          }
         }
       });
     }
@@ -379,6 +433,9 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
 
   // 窄屏布局：底部导航栏
   Widget _buildNarrowLayout(BuildContext context) {
+    if (useNativeTabBar) {
+      return _buildNativeNarrowLayout(context);
+    }
     // 窄屏下二级页面仍全屏打开，不保留底部导航栏
     return Column(
       children: [
@@ -394,6 +451,37 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
           items: _navItems(context),
           selectedIndex: _selectedIndex,
           onSelected: _onDestinationSelected,
+        ),
+      ],
+    );
+  }
+
+  // iOS 26+ 窄屏布局：原生液态玻璃导航栏悬浮在页面之上，页面铺满全屏，
+  // 底部安全区加上导航栏高度后传给页面，滚动内容可从玻璃下方透出
+  Widget _buildNativeNarrowLayout(BuildContext context) {
+    final MediaQueryData media = MediaQuery.of(context);
+    final double barHeight = media.padding.bottom + NativeTabBar.height;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: MediaQuery(
+            data: media.copyWith(
+              padding: media.padding.copyWith(bottom: barHeight),
+            ),
+            child: _buildNarrowPager(),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: barHeight,
+          child: NativeTabBar(
+            items: _navItems(context),
+            selectedIndex: _selectedIndex,
+            onSelected: _onDestinationSelected,
+            dark: context.palette.isDark,
+          ),
         ),
       ],
     );
@@ -417,7 +505,7 @@ class _HomeScreenState extends State<HomeScreen> with WindowListener {
               currentLocale: widget.locale,
               onThemeModeChanged: widget.onThemeModeChanged,
               themeMode: widget.themeMode,
-              currentVersion: '$currentVersion',
+              currentVersion: currentVersion,
               onCheckUpdate: _checkForUpdates,
             ),
         },

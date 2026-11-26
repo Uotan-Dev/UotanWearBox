@@ -36,6 +36,12 @@
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>选择文件时可拍摄照片或视频，用于传输到你的智能手表。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问相册，以便选择照片或视频传输到你的智能手表。</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>本应用不会获取你的位置信息；此说明仅因所用的系统文件选择组件而需要提供。</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>需要访问局域网，以便通过网络 ADB 连接并管理你的智能手表。</string>
 	<key>UIApplicationSceneManifest</key>

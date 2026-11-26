@@ -38,7 +38,15 @@ class StorePage extends StatelessWidget {
         title: l10n.storeTitle,
         body: LayoutBuilder(
           builder: (context, constraints) => SingleChildScrollView(
-            child: SizedBox(height: constraints.maxHeight, child: body),
+            child: SizedBox(
+              height: constraints.maxHeight,
+              // 避开悬浮的原生导航栏（其他布局下底部 padding 为 0）
+              child: Padding(
+                padding: EdgeInsets.only(
+                    bottom: MediaQuery.paddingOf(context).bottom),
+                child: body,
+              ),
+            ),
           ),
         ),
       );

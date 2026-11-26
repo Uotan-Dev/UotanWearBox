@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Mac App Store 版（App 沙盒）。由 macos/scripts/build_mac_app_store.sh 通过 CODE_SIGN_ENTITLEMENTS 指定；
+  官网分发的版本仍使用 Release.entitlements（不开沙盒）。
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	<!-- 无线 ADB 连接手表、检查更新 -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!-- 随 App 打包的 adb 会在本机回环地址上启动 adb 服务 -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	<!-- USB 连接手表（adb / fastboot） -->
+	<key>com.apple.security.device.usb</key>
+	<true/>
+	<!-- 用户通过打开 / 保存面板选择的文件（安装 APK、上传文件、选择导出位置） -->
+	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<!-- 截图、录屏、导出 APK 的默认保存位置 -->
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+</dict>
+</plist>

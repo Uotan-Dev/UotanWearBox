@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+import 'platform_support.dart';
+
+/// Mac App Store 版的 adb 服务端口。沙盒中的 adb 与用户自行安装的 adb（默认 5037）互不干扰；
+/// 与 macos/Runner/AppDelegate.swift 中退出时 kill-server 使用的端口保持一致
+const String macAppStoreAdbPort = '15037';
+
 /// 解析 adb / fastboot 可执行文件路径。
 ///
 /// macOS 上从 Finder 启动的 GUI 应用拿不到 shell 的 PATH（不含 /opt/homebrew/bin 等），
@@ -21,8 +27,15 @@ Map<String, String>? toolEnvironment;
 
 const MethodChannel _channel = MethodChannel('wearbox/platform_tools');
 
-/// 启动时调用：Android 上获取随 APK 打包的工具路径和可写目录
+/// 启动时调用：Android 上获取随 APK 打包的工具路径和可写目录；
+/// Mac App Store 版改用独立的 adb 服务端口
 Future<void> initPlatformTools() async {
+  if (isMacAppStoreBuild) {
+    toolEnvironment = <String, String>{
+      'ANDROID_ADB_SERVER_PORT': macAppStoreAdbPort,
+    };
+    return;
+  }
   if (!Platform.isAndroid) {
     return;
   }
@@ -40,16 +53,37 @@ Future<void> initPlatformTools() async {
   };
 }
 
+/// macOS：Android File Transfer（含菜单栏常驻的 Agent）是否在运行。
+/// 它会独占通过 USB 连接的安卓设备，导致 adb 无法识别手表
+Future<bool> isAndroidFileTransferRunning() async {
+  if (!Platform.isMacOS) {
+    return false;
+  }
+  try {
+    return await _channel.invokeMethod<bool>('isAndroidFileTransferRunning') ??
+        false;
+  } catch (_) {
+    return false;
+  }
+}
+
 String _resolveTool(String name) {
   if (!Platform.isMacOS && !Platform.isLinux) {
     return name;
   }
 
+  // 随应用打包的 platform-tools（WearBox.app/Contents/Resources/platform-tools）
+  final String bundled =
+      '${File(Platform.resolvedExecutable).parent.parent.path}/Resources/platform-tools';
+  // App 沙盒只允许执行包内的程序，Mac App Store 版不查找系统中安装的 adb
+  if (isMacAppStoreBuild) {
+    return '$bundled/$name';
+  }
+
   final Map<String, String> env = Platform.environment;
   final String home = env['HOME'] ?? '';
   final List<String> dirs = <String>[
-    // 随应用打包的 platform-tools（WearBox.app/Contents/Resources/platform-tools）
-    '${File(Platform.resolvedExecutable).parent.parent.path}/Resources/platform-tools',
+    bundled,
     if (env['ANDROID_HOME'] != null) '${env['ANDROID_HOME']}/platform-tools',
     if (env['ANDROID_SDK_ROOT'] != null)
       '${env['ANDROID_SDK_ROOT']}/platform-tools',

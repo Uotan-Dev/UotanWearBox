@@ -1,19 +1,30 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'platform_support.dart';
+
 const String _appCenterPrefsKey = 'app_center_enabled';
 const String _privacyConsentPrefsKey = 'privacy_consent';
 
+/// 当前版本是否提供应用中心。应用中心尚未完成（仅占位页），在商店版本（App Store / Google Play）中
+/// 隐藏，以免因功能不完整被拒审
+final bool appCenterAvailable = !isStoreBuild;
+
 /// 是否启用应用中心（导航栏中的"应用"页面），在设置 → 功能中切换
-final ValueNotifier<bool> appCenterEnabled = ValueNotifier<bool>(true);
+final ValueNotifier<bool> appCenterEnabled =
+    ValueNotifier<bool>(appCenterAvailable);
 
 /// 启动时读取已保存的设置
 Future<void> loadAppPrefs() async {
   final prefs = await SharedPreferences.getInstance();
-  appCenterEnabled.value = prefs.getBool(_appCenterPrefsKey) ?? true;
+  appCenterEnabled.value =
+      appCenterAvailable && (prefs.getBool(_appCenterPrefsKey) ?? true);
 }
 
 void setAppCenterEnabled(bool enabled) {
+  if (!appCenterAvailable) {
+    return;
+  }
   appCenterEnabled.value = enabled;
   SharedPreferences.getInstance()
       .then((prefs) => prefs.setBool(_appCenterPrefsKey, enabled));

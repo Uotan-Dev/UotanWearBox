@@ -43,3 +43,31 @@ for f in $FILES; do
   ditto "$CACHE_DIR/$f" "$DEST/$f"
 done
 echo "Bundled platform-tools into $DEST"
+
+# Mac App Store 版（WEARBOX_MAC_APP_STORE=YES，见 build_mac_app_store.sh）：
+# 包内可执行文件须由本团队签名并带沙盒继承 entitlement，替换 Google 原有签名
+if [ "$WEARBOX_MAC_APP_STORE" = "YES" ]; then
+  IDENTITY="${EXPANDED_CODE_SIGN_IDENTITY:-$CODE_SIGN_IDENTITY}"
+  for bin in adb fastboot; do
+    codesign --force --sign "$IDENTITY" --timestamp=none \
+      --identifier "com.gnayoah.wearbox.$bin" \
+      --entitlements "$SRCROOT/Runner/MacAppStoreHelper.entitlements" \
+      "$DEST/$bin"
+  done
+  echo "Signed platform-tools for the Mac App Store with $IDENTITY"
+
+  # 插件（Swift Package）的资源包只含隐私清单等资源、没有可执行文件，但构建时被单独签了开发证书；
+  # 导出时 Xcode 不会为 Resources 下的资源包重签发布证书，导致 App Store 报 ITMS-90284。
+  # 去掉其独立签名，作为普通资源由 App 的签名统一封装
+  RESOURCES="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+  for bundle in "$RESOURCES"/*.bundle; do
+    [ -d "$bundle" ] || continue
+    if [ -e "$bundle/Contents/MacOS" ]; then
+      echo "warning: $bundle contains an executable; keeping its signature" >&2
+      continue
+    fi
+    codesign --remove-signature "$bundle" 2>/dev/null || true
+    rm -rf "$bundle/Contents/_CodeSignature"
+    echo "Removed standalone signature from ${bundle##*/}"
+  done
+fi
