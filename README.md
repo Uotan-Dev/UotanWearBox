@@ -41,7 +41,7 @@
 </div>
 
 
-
+<!--
 <a id="chinese"></a>
 
 #
@@ -51,7 +51,7 @@ banner
 <br><img width="1280" height="640" alt="Desktop 12" src="https://github.com/user-attachments/assets/930b933e-7bcf-44d8-8af4-2a165c55d493" />-->
 
 
-
+<!--
 <img width="5780" height="2510" alt="Frame 11" src="https://github.com/user-attachments/assets/10fe2f6f-8096-455e-940b-81ced76498c5" />
 
 
